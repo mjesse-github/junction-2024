@@ -20,49 +20,58 @@ type ImagePair = {
   title: string
 }
 
-const imagePairs: ImagePair[] = [
-  {
-    image1: "/landfill.png",
-    image2: "/burning-man.png",
-    correctAnswer: "image1",
-    description1: "Landfill",
-    description2: "Burning man",
-    location: "Nevada Desert, USA",
-    charity: {
-      name: "Clean Up The World",
-      url: "https://www.cleanuptheworld.org/"
+async function fetchImagePairs(): Promise<ImagePair[]> {
+  // TODO: Replace with actual API call
+  // Example API call:
+  // const response = await fetch('/api/image-pairs');
+  // return response.json();
+  
+  // Temporary stub data
+  return [
+    {
+      image1: "/landfill.png",
+      image2: "/burning-man.png",
+      correctAnswer: "image1",
+      description1: "Landfill",
+      description2: "Burning man",
+      location: "Nevada Desert, USA",
+      charity: {
+        name: "Clean Up The World",
+        url: "https://www.cleanuptheworld.org/"
+      },
+      title: "Pick the landfill"
     },
-    title: "Pick the landfill"
-  },
-  {
-    image1: "/placeholder.svg?height=400&width=300",
-    image2: "/placeholder.svg?height=400&width=300",
-    correctAnswer: "image1",
-    description1: "Solar Farm",
-    description2: "Computer Circuit Board",
-    location: "Mojave Desert, California",
-    charity: {
-      name: "Solar Aid",
-      url: "https://solar-aid.org/"
+    {
+      image1: "/placeholder.svg?height=400&width=300",
+      image2: "/placeholder.svg?height=400&width=300",
+      correctAnswer: "image1",
+      description1: "Solar Farm",
+      description2: "Computer Circuit Board",
+      location: "Mojave Desert, California",
+      charity: {
+        name: "Solar Aid",
+        url: "https://solar-aid.org/"
+      },
+      title: "Pick the solar farm"
     },
-    title: "Pick the solar farm"
-  },
-  // {
-  //   image1: "/placeholder.svg?height=400&width=300",
-  //   image2: "/placeholder.svg?height=400&width=300",
-  //   correctAnswer: "image2",
-  //   description1: "Rice Farm",
-  //   description2: "Lithium Mine",
-  //   location: "Salar de Uyuni, Bolivia",
-  //   charity: {
-  //     name: "Environmental Defense Fund",
-  //     url: "https://www.edf.org/"
-  //   },
-  //   title: "Pick the lithium mine"
-  // }
-]
+    // {
+    //   image1: "/placeholder.svg?height=400&width=300",
+    //   image2: "/placeholder.svg?height=400&width=300",
+    //   correctAnswer: "image2",
+    //   description1: "Rice Farm",
+    //   description2: "Lithium Mine",
+    //   location: "Salar de Uyuni, Bolivia",
+    //   charity: {
+    //     name: "Environmental Defense Fund",
+    //     url: "https://www.edf.org/"
+    //   },
+    //   title: "Pick the lithium mine"
+    // }
+  ];
+}
 
 export default function GreenOrBad() {
+  const [imagePairs, setImagePairs] = useState<ImagePair[]>([])
   const [currentPair, setCurrentPair] = useState<ImagePair | null>(null)
   const [score, setScore] = useState(0)
   const [totalQuestions, setTotalQuestions] = useState(0)
@@ -72,11 +81,23 @@ export default function GreenOrBad() {
   const [revealAnswer, setRevealAnswer] = useState(false)
 
   useEffect(() => {
-    console.log('Current pair:', currentPair);
-    nextQuestion();
+    const loadImagePairs = async () => {
+      try {
+        const pairs = await fetchImagePairs()
+        setImagePairs(pairs)
+        const randomPair = pairs[Math.floor(Math.random() * pairs.length)]
+        setCurrentPair(randomPair)
+      } catch (error) {
+        console.error('Failed to load image pairs:', error)
+        // TODO: Add error handling UI
+      }
+    }
+
+    loadImagePairs()
   }, [])
 
   const nextQuestion = () => {
+    if (imagePairs.length === 0) return
     const randomPair = imagePairs[Math.floor(Math.random() * imagePairs.length)]
     setCurrentPair(randomPair)
     setFeedback(null)
