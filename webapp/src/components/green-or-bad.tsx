@@ -49,7 +49,7 @@ export default function GreenOrBad() {
     {
       role: "system",
       content: `
-  Return a json response in this format:
+  Return a JSON response in this format:
 
       {
        "correct": boolean,
