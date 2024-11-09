@@ -8,7 +8,6 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
-import { PreviousAnswersCloud } from './PreviousAnswersCloud';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
@@ -96,15 +95,15 @@ export const backend = {
   // const getRecentAnswers = async (imageId: string) => {
   //   try {
   //     const response = await fetch(
-  //       `${backend.baseUrl}/api/groq/guesses?` + 
+  //       `${backend.baseUrl}/api/groq/guesses?` +
   //       new URLSearchParams({
   //         image_id: imageId,
   //         limit: '10'
   //       })
   //     );
-      
+
   //     if (!response.ok) throw new Error('Failed to fetch recent answers');
-      
+
   //     const data = await response.json();
   //     console.log('Recent answers for image:', imageId, data);
   //     return data;
@@ -209,7 +208,7 @@ export default function GreenOrBad() {
             Go all-in on that iconic irony — like you’re too cool to care but you’re kind of vibing with their attempt. If they’re serving sigma, they’ll feel it. If they’re giving sus, they’ll know it. Zero sweetness; this is brainrot humor, not a motivational speech.
             Final Brainrot:
             Every once in a while, drop in a random “why is this so real” or "chat is this real" comment to keep it spicy. Shitpost as much as possible. Never say out the answer`
-      
+
       },
     ],
   };
@@ -239,7 +238,7 @@ export default function GreenOrBad() {
 
   const pickRandomUnseenItem = () => {
     const unseenItems = imageItems.filter(item => !seenItems.has(item.correctAnswer));
-  
+
     if (unseenItems.length === 0) {
       setSeenItems(new Set());
       const randomItem = imageItems[Math.floor(Math.random() * imageItems.length)];
@@ -249,7 +248,7 @@ export default function GreenOrBad() {
       setCurrentItem(randomItem);
       setSeenItems(prevSeen => new Set(prevSeen).add(randomItem.correctAnswer));
     }
-  
+
     // Reset state variables for new item
     setFeedback(null);
     setHint(null);
@@ -257,7 +256,7 @@ export default function GreenOrBad() {
     setUserAnswer("");
     setPreviousAnswers([]);
     setIsCorrect(false);
-  
+
     // Set conversation with the current item details if available
     if (currentItem) {
       setConversation([
@@ -268,10 +267,10 @@ export default function GreenOrBad() {
         }
       ]);
     }
-  
+
     // Focus input after setting a new question
     setTimeout(() => inputRef.current?.focus(), 0);
-  };  
+  };
 
   const decider = async (guess: string) => {
     if (!currentItem) return;
@@ -286,9 +285,9 @@ export default function GreenOrBad() {
 
       const updatedConversation: ChatMessage[] = [
         ...conversation,
-        { 
-          role: "user", 
-          content: `The right answer is "${currentItem.correctAnswer}", The User guessed: "${guess}"` 
+        {
+          role: "user",
+          content: `The right answer is "${currentItem.correctAnswer}", The User guessed: "${guess}"`
         },
       ];
 
@@ -320,7 +319,7 @@ export default function GreenOrBad() {
           setShowCharity(true);
           setUserAnswer(currentItem.correctAnswer);
           setIsCorrect(true);
-          
+
           // Fetch and log recent answers when correct
           await backend.getRecentAnswers(currentItem.imageName);
         } else {
@@ -400,7 +399,7 @@ export default function GreenOrBad() {
 
   if (showLanding) {
     return (
-      <div 
+      <div
         className="h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden cursor-pointer"
         onClick={handleStartGame}
         onKeyDown={(e) => e.key === 'Enter' && handleStartGame()}
@@ -409,8 +408,8 @@ export default function GreenOrBad() {
       >
         {/* Subtle animated gradient background */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]" />
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 max-w-2xl text-center space-y-16 px-4"
@@ -420,7 +419,7 @@ export default function GreenOrBad() {
 
           {/* Objectives */}
           <div className="space-y-8">
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -429,7 +428,7 @@ export default function GreenOrBad() {
               Explore satellite imagery of Earth's most intriguing locations
             </motion.p>
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -438,7 +437,7 @@ export default function GreenOrBad() {
               Discover the impact of human activity from space
             </motion.p>
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
@@ -467,14 +466,14 @@ export default function GreenOrBad() {
       <div className="relative min-h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
         {/* Subtle animated gradient background */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]" />
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="relative z-10 text-center space-y-16 max-w-2xl px-4"
         >
           {/* Elegant title with subtle animation */}
-          <motion.h2 
+          <motion.h2
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             className="text-5xl sm:text-7xl font-light tracking-tight text-white"
@@ -484,7 +483,7 @@ export default function GreenOrBad() {
               Experience
             </span>
           </motion.h2>
-          
+
           {/* Minimalist choice buttons */}
           <div className="flex flex-col sm:flex-row gap-8 sm:gap-12">
             <motion.button
@@ -523,7 +522,7 @@ export default function GreenOrBad() {
           </div>
 
           {/* Subtle decorative element */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/30 text-sm tracking-widest"
@@ -540,14 +539,14 @@ export default function GreenOrBad() {
   return (
     <div className="h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]" />
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="relative z-10 w-full max-w-4xl h-[90vh] flex flex-col"
       >
         {/* Header - Now just the question title */}
-        <motion.h2 
+        <motion.h2
           initial={{ y: 20 }}
           animate={{ y: 0 }}
           className="text-3xl sm:text-4xl font-light tracking-tight text-white text-center mb-4"
@@ -579,7 +578,7 @@ export default function GreenOrBad() {
           <div className="space-y-3 flex-shrink-0">
             {/* Hint */}
             {hint && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center text-emerald-300/60 text-sm font-light"
