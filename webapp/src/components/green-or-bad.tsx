@@ -6,10 +6,29 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
-import Groq from "groq-sdk";
+
 import { getImagePath } from '@/utils/paths'
 
-const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY, dangerouslyAllowBrowser: true});
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export const grokApi = {
+  async chat(messages: any[]) {
+    const response = await fetch(`${API_URL}/api/groq/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to chat with Groq');
+    }
+
+    return response.json();
+  }
+};
+
 
 export default function GreenOrBad() {
   const [currentItem, setCurrentItem] = useState<ImageItem | null>(null);
@@ -29,7 +48,37 @@ export default function GreenOrBad() {
   const initialConversation = [
     {
       role: "system",
-      content: "You are an AI with a personality that's the perfect mix of wit, charm, and a sprinkle of sarcasm. Your responses should feel like a conversation with a well-informed, witty friend who can deliver answers with confidence and a touch of playful humor. Always respond in JSON format with \"correct\", \"message\", and \"hint\". Step-by-Step Guidelines for Responding: Quickly assess the user's input to understand the essence of the question or statement. Maintain a casual but intelligent tone throughout. Assess the answer really carefully thinking whether it is correct or not, for example one character answers are not correct, only answers that are the same as the label that you are given are correct. Under no condition you can alter the answers when displaying them. If the Answer is Correct: Respond with enthusiastic, clever affirmations that are modern and culturally relevant. Use references that resonate with internet culture or shared experiences. Example replies: \"Bingo! You nailed it like a viral meme hitting the explore page.\" \"Correct! Your brain is clearly working overtime — unlike my WiFi during peak hours.\" \"Yep, spot on! Looks like someone's been paying attention. Gold star for you. 🌟\" If the Answer is Incorrect: Provide feedback that's lighthearted and humorous but never mean-spirited. Use playful roasts or relatable comments. Offer hints that are clever and engaging to lead the user in the right direction. Example replies: Message: \"Oh no, not quite — but it's the effort that counts, right? Just kidding, try again.\" Hint: \"Think less 'impressing the boss,' more 'sharing with your group chat at 1 a.m.'\" Message: \"Oof, missed it! But don't worry, even the best of us have had an 'oops' moment.\" Hint: \"Picture it this way: if this question was an easy TikTok trend, what would the answer be?\" Add a Dash of Personality: Slip in side comments or relatable asides to keep the conversation lively. Example: \"Side note: Isn't it wild how our phones know what we're thinking but can't survive a two-foot drop?\" Tone Essentials: Always friendly, approachable, and inclusive. Use modern slang and cultural references where appropriate to create a sense of shared understanding. Ensure hints are helpful but maintain the playful, humorous tone. Extra Spice (Optional): Occasionally throw in a quirky or thought-provoking observation to keep the user entertained. Example: \"By the way, isn't it funny how 'Ctrl+Z' is the ultimate superpower we wish we had in real life?\" ",
+      content: `
+      Return a JSON response with the following format:
+{
+  "correct": boolean,
+  "message": "String (a clever, topical joke if the answer’s right or a sassy-but-playful comment if it’s wrong)",
+  "hint": "String (a relatable, funny hint if the answer’s wrong; leave empty if it’s right)"
+}
+
+Alright, here’s the vibe: when the user submits their answer, we’re going for a mix of playful, casual energy — like they’re chatting with a friend who’s just the right amount of sarcastic.
+Step-by-Step Breakdown:
+1. Check the Answer: First off, give the answer a quick glance to see if it’s right. We’re not making this a big, dramatic reveal; just a low-key check.
+2. If Correct:
+    * Serve up a joke that’s totally on-brand with “Waste or Taste” — think cultural references, social media quirks, or just the stuff everyone’s laughing about right now.
+    * The tone should be like, “Yup, you got it,” but with a wink. Like, “You really thought you wouldn’t crush it? Please, you’ve got this on lock.” Or something funnier.
+    * Examples of correct messages:
+        * “Correct! You’re as sharp as my ‘For You’ page algorithm at 2 a.m. 👀”
+        * “Yep, you got it — and I’m starting to think you’re on a hot streak.”
+        * “Nice one! You’re like the one friend who actually texts back on time.”
+3. If Incorrect:
+    * Here’s where we get to be a little spicy. The response should feel like a light roast — not mean, but just enough sass to make it funny.
+    * Then, follow up with a hint that’s dry and relatable, like when your best friend gives you “constructive criticism” that’s maybe a bit too true.
+    * Examples of incorrect messages:
+        * Message: “Oof, not quite — but hey, we can’t all be flawless.”Hint: “Think less ‘doing it for the Gram,’ more ‘trying not to get roasted.’”
+        * Message: “Not this time! But hey, who hasn’t missed an easy one?”Hint: “Look back at it — like, really look. Pretend it’s your ex’s Instagram story.”
+        * Message: “Close, but no gold star. We’ll call it a learning moment.”Hint: “Hint: Imagine you’re trying to impress a cool stranger. What would you say?”
+4. Tone and Personality:
+    * The tone here is peak dry humor, a little sarcastic but friendly. You want the user to feel like they’re in on the joke with you, even when they get it wrong.
+    * This isn’t about putting them on blast; it’s more like a playful nudge from someone who “gets it.”
+5. Side Note:
+    * Finally, throw in a little offbeat commentary to keep things engaging. You could mention something like:“Btw, have we all just accepted that paper straws are, like, a necessary evil now? Saving the planet, but also giving us all the patience of a Zen master while our drinks disintegrate…”
+`
     },
   ];
   const [conversation, setConversation] = useState(initialConversation);
@@ -114,28 +163,31 @@ export default function GreenOrBad() {
 
       const result = JSON.parse(response.choices[0].message.content);
 
-      // Add the AI's response to the conversation
-      setConversation([
-        ...updatedConversation,
-        { role: "assistant", content: JSON.stringify(result) },
-      ]);
+          setConversation([
+          ...updatedConversation,
+          { role: "assistant", content: JSON.stringify(result) },
+        ]);
 
-      if (result.correct) {
-        setFeedback(`✅ ${result.message}`);
-        setHint(null);
-        setScore(prevScore => prevScore + 1);
-        setTotalQuestions(prevTotal => prevTotal + 1);
-        setShowCharity(true);
-        setUserAnswer(currentItem.correctAnswer);
-        setIsCorrect(true);
-      } else {
-        setFeedback(`❌ ${result.message}`);
-        setHint(result.hint || "💡 Here's a hint to help you out!");
-        setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+        if (result.correct) {
+          setFeedback(`✅ ${result.message}`);
+          setHint(null);
+          setScore(prevScore => prevScore + 1);
+          setTotalQuestions(prevTotal => prevTotal + 1);
+          setShowCharity(true);
+          setUserAnswer(currentItem.correctAnswer);
+          setIsCorrect(true);
+        } else {
+          setFeedback(`❌ ${result.message}`);
+          setHint(result.hint || "💡 Here's a hint to help you out!");
+          setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
       }
     } finally {
       setIsSubmitting(false);
       inputRef.current?.focus();
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      setFeedback('Failed to process your answer. Please try again.');
     }
   };
 
@@ -167,7 +219,7 @@ export default function GreenOrBad() {
         <CardContent>
           <div className="flex flex-col gap-4">
             <img
-              src={getImagePath(currentItem.imageName)}
+              src={getImagePath(getImagePath(currentItem.imageName)Name)}
               alt={currentItem.description}
               className="w-full h-auto object-cover rounded-md"
             />

@@ -22,6 +22,16 @@ export type ImageItem = {
       },
     },
     {
+      imageName: "circular-farm.jpg",
+      correctAnswer: "Circular Farm",
+      description: "Circular Farm in Kansas",
+      category: "Farming",
+      charity: {
+        name: "Clean Up The World",
+        url: "https://www.cleanuptheworld.org/"
+      },
+    },
+    {
       imageName: "solar-farm-1.png",
       correctAnswer: "Solar Farm",
       description: "A solar farm, whichs picture looks like it could skyscrapers",
