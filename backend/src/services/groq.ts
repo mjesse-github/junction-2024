@@ -49,6 +49,13 @@ export async function storeUserGuess(guess: UserGuess) {
   }
 }
 
+type FindQuery = {
+    user_id: string;
+    image_id: string;
+    is_correct: boolean | null;
+    limit: number;
+}
+
 export async function chatWithGroq(messages: ChatMessage[]) {
   try {
     const completion = await groq.chat.completions.create({
@@ -65,3 +72,38 @@ export async function chatWithGroq(messages: ChatMessage[]) {
     throw error;
   }
 } 
+
+type SearchGuessesOptions = {
+  image_id?: string;
+  is_correct?: boolean;
+  limit?: number;
+};
+
+export async function findRecentGuesses(request: FindQuery) {
+  try {
+    const db = await connectDB();
+    const collection = db.collection('guesses');
+    
+    // Build query object dynamically
+    const query: Record<string, any> = {};
+    
+    if (request.image_id) {
+      query.image_id = request.image_id;
+    }
+    
+    if (request.is_correct) {
+      query.is_correct = request.is_correct;
+    }
+
+    const result = await collection
+      .find(query)
+      .sort({ timestamp: -1 })  // Sort by most recent first
+      .limit(request.limit)
+      .toArray();
+
+    return result;
+  } catch (error) {
+    console.error('Error searching guesses:', error);
+    throw error;
+  }
+}
