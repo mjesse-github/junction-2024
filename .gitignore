@@ -1,5 +1,8 @@
 .idea
+xview-yolov3/yolo
 
+**/.env
+**/.env.local
 # Logs
 logs
 *.log
