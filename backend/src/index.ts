@@ -15,15 +15,9 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  methods: ['POST'],
-  allowedHeaders: ['Content-Type'],
 }));
 
 app.use('/api/groq', groqRouter);
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

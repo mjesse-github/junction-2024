@@ -1,5 +1,13 @@
 import Groq from 'groq-sdk';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// Debug: Print environment variables
+console.log('Environment variables at startup:', {
+    GROQ_API_KEY: process.env.GROQ_API_KEY ? 'exists' : 'missing',
+    NODE_ENV: process.env.NODE_ENV,
+  });
 if (!process.env.GROQ_API_KEY) {
   throw new Error('GROQ_API_KEY is required');
 }
