@@ -8,6 +8,8 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
+import { PreviousAnswersCloud } from './PreviousAnswersCloud';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
 
@@ -65,6 +67,31 @@ export const backend = {
     } catch (error) {
       console.error('Store answer failed:', error);
       throw new Error('Failed to save your answer. Please try again.');
+    }
+  },
+  async getRecentAnswers(query: {
+    user_id: string;
+    image_id: string;
+    is_correct: boolean | null;
+    limit: number;
+  }) {
+    try {
+      const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(query),
+      });
+
+      if (!previousAnswers.ok) {
+        const errorData = await previousAnswers.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
+      }
+
+      return previousAnswers.json();
+    } catch (error) {
+      console.error('Find previous replies failed failed:', error);
     }
   }
 };
@@ -264,6 +291,7 @@ export default function GreenOrBad() {
           setShowCharity(true);
           setUserAnswer(currentItem.correctAnswer);
           setIsCorrect(true);
+          //TODO fetch previous guessess and visualise
         } else {
           setFeedback(`❌ ${result.message}`);
           setHint(result.hint || "💡 Here's a hint to help you out!");
