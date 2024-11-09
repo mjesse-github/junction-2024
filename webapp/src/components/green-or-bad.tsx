@@ -157,7 +157,7 @@ export default function GreenOrBad() {
     ],
   };
 
-  const [conversation, setConversation] = useState<ChatMessage[]>([]);
+  const [conversation, setConversation] = useState<Array<{ role: string; content: string; }>>([]);
 
   const handleDifficultySelect = (mode: 'easy' | 'hard') => {
     setDifficulty(mode);
