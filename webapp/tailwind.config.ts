@@ -9,6 +9,18 @@ module.exports = {
   ],
   theme: {
   	extend: {
+		extend: {
+			// ... other extensions
+			keyframes: {
+			  'bounce-once': {
+				'0%, 100%': { transform: 'translateY(0)' },
+				'50%': { transform: 'translateY(-5px)' },
+			  },
+			},
+			animation: {
+			  'bounce-once': 'bounce-once 0.5s ease-in-out',
+			},
+		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
