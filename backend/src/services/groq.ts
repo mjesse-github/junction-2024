@@ -1,5 +1,6 @@
 import Groq from 'groq-sdk';
 import dotenv from 'dotenv';
+import { connectDB } from './mongodb';
 
 dotenv.config();
 
@@ -19,6 +20,33 @@ const groq = new Groq({
 type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
+}
+
+type UserGuess = {
+    user_id: string;
+    image_id: string;
+    category: string;
+    guess: string
+    is_correct: boolean;
+
+}
+
+export async function storeUserGuess(guess: UserGuess) {
+  try {
+    const db = await connectDB();
+    const collection = db.collection('guesses');
+    
+    const result = await collection.insertOne({
+      ...guess,
+      timestamp: new Date(),
+    });
+
+    console.log(`Stored guess with ID: ${result.insertedId}`);
+    return result;
+  } catch (error) {
+    console.error('Error storing guess:', error);
+    throw error;
+  }
 }
 
 export async function chatWithGroq(messages: ChatMessage[]) {

@@ -11,7 +11,7 @@ import { getImagePath } from '@/utils/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
 
-export const grokApi = {
+export const backend = {
   async chat(messages: any[]) {
     const response = await fetch(`${API_URL}/api/groq/chat`, {
       method: 'POST',
@@ -19,6 +19,21 @@ export const grokApi = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ messages }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to chat with Groq');
+    }
+
+    return response.json();
+  },
+  async submitResponse(userResponse: any) {
+    const response = await fetch(`${API_URL}/api/groq/storeAnswer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userResponse),
     });
 
     if (!response.ok) {
@@ -145,7 +160,8 @@ export default function GreenOrBad() {
 
     if (unseenItems.length === 0) {
       setSeenItems(new Set());
-      setCurrentItem(imageItems[Math.floor(Math.random() * imageItems.length)]);
+      const currentItem = imageItems[Math.floor(Math.random() * imageItems.length)]
+      setCurrentItem(currentItem);
     } else {
       const randomItem = unseenItems[Math.floor(Math.random() * unseenItems.length)];
       setCurrentItem(randomItem);
@@ -181,9 +197,16 @@ export default function GreenOrBad() {
         ...conversation,
         { role: "user", content: `The right answer is "${currentItem.correctAnswer}", The User guessed: "${guess}"` },
       ];
-
-      const response = await grokApi.chat(updatedConversation);
+      const response = await backend.chat(updatedConversation);
       const result = JSON.parse(response.content);
+      //maybe even no need to oawait
+      const rr  = await backend.submitResponse({
+          user_id: null,
+          image_id: currentItem.imageName,
+          category: currentItem.category,
+          guess: guess, 
+          is_correct: result.correct
+      }); 
 
       setConversation([
         ...updatedConversation,
@@ -197,11 +220,13 @@ export default function GreenOrBad() {
         setTotalQuestions(prevTotal => prevTotal + 1);
         setShowCharity(true);
         setUserAnswer(currentItem.correctAnswer);
-        setIsCorrect(true);
+        setIsCorrect(true); 
       } else {
         setFeedback(`❌ ${result.message}`);
         setHint(result.hint || "💡 Here's a hint to help you out!");
         setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+        // setLongAnswersOfOtherUsers();
+        //todo fetch async wrong answers to inspire. Or wehn correct?
       }
     } catch (error) {
       console.error('Chat error:', error);
