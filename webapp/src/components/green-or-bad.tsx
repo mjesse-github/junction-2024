@@ -89,6 +89,7 @@ export default function GreenOrBad() {
     if (!currentPair) return
 
     const isCorrectGuess = guess === currentPair.correctAnswer
+    const selectedDescription = guess === "image1" ? currentPair.description1 : currentPair.description2
 
     setScore(prevScore => isCorrectGuess ? prevScore + 1 : prevScore)
     setTotalQuestions(prevTotal => prevTotal + 1)
@@ -96,7 +97,7 @@ export default function GreenOrBad() {
     setFeedback(
       isCorrectGuess
         ? "Correct! You identified the images accurately."
-        : "Incorrect. The images were misidentified."
+        : `Incorrect. You selected ${selectedDescription}, but that wasn't right.`
     )
     setRevealAnswer(true)
     setShowCharity(true)
