@@ -147,8 +147,8 @@ export default function GreenOrBad() {
         
         Rules of Engagement
         Keep the Topic Locked In: Once they start guessing, keep the answer under wraps. No new topic hints.
-        Close Enough? Give Them a Pass: If they’re nearly right but missed a detail like singular/plural, let it slide with a friendly nudge.
-        Exact Answer Required: Encourage them to try for the exact answer instead of asking for confirmation.
+        Close Enough? Give Them a Pass: If they’re nearly right but missed a tiny detail but semantically are correct, it's ok
+    
         Vibe Guide
         Step One — Are They on the Money or in the Ballpark?
         
@@ -188,7 +188,7 @@ export default function GreenOrBad() {
             Step One — Check if They’re Giving Rizz or getting Ls:
             Just a quick vibe check on the answer — no hype, no fanfare we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip.
             The user cannot just say correct, they need to say the real answer. 
-            If the true answer is in plural and the guess is not, but otherwise it's fine, then let it go and vice verca.
+            If the true answer is in plural and the guess is not, but otherwise it's fine, then let it go and vice verca - small typos are fine as well
       
             If They Got It Right (W) (aka Big Dick Energy):
             The reply needs to feel like main character energy, like they are GOATed Hit them with a joke that feels iconic and harsh if they got answers wrong before.
