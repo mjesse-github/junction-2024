@@ -9,7 +9,7 @@ import { imageItems, ImageItem } from "@/config/imageItems";
 
 import { getImagePath } from '@/utils/paths'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
 
 export const grokApi = {
   async chat(messages: any[]) {
