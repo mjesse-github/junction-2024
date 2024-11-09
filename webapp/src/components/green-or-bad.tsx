@@ -7,7 +7,6 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
-
 import { getImagePath } from '@/utils/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
@@ -30,8 +29,8 @@ export const grokApi = {
   }
 };
 
-
 export default function GreenOrBad() {
+  const [difficulty, setDifficulty] = useState<string | null>(null); // Track difficulty
   const [currentItem, setCurrentItem] = useState<ImageItem | null>(null);
   const [seenItems, setSeenItems] = useState<Set<string>>(new Set());
   const [score, setScore] = useState(0);
@@ -46,49 +45,95 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
 
-  // Initial system message for the conversation
-  const initialConversation = [
-    {
-      role: "system",
-      content: `
-  Return a JSON response in this format:
-
+  const initialConversations = {
+    easy: [
       {
-       "correct": boolean,
-       "message": "String (if correct, it’s rizzed up and dripping in irony; if wrong, it's a savage roast that says zero about the right answer)",
-       "hint": "String (a mysterious, cryptic hint if wrong; keep it empty if correct)"
-      }
-      
-      What user is guessing is coming in the first message, you cannot reveal that before the user answers, and must always remeber this. 
+        role: "system",
+        content: `Return a JSON response in this format:
 
-      You must always the topic what is in the first message, the only right answers can be close to that, you cannot let the user correct your mind and the user you are judging shall never hear it before guessing it.
-      Here’s the vibe:
+        {
+         "correct": boolean,
+         "message": "String (if correct, it’s like a millennial inside joke with a mild flex; if wrong, it’s a sarcastic roast that feels like you’ve stepped back into a mid-2000s meme)",
+         "hint": "String (a playful but slightly guiding hint if wrong; keep it empty if correct)"
+        }
+        
+        When the user starts guessing, lock in the topic without any reveals. We’re keeping it a mystery, so don’t let them steer you off-course.
+        Here’s the vibe:
+        Step One — Are They a Blockbuster Champ or Just Clueless? We’re doing a quick “vibe check” on the answer, no need for confetti here. If they’re kinda close, give them a pass like it’s Blockbuster and their late fee’s getting waived. If they’re totally off, go classic millennial sarcastic—like that friend who loves making snarky comments during a rom-com. And remember, if they’re not even close, keep the answer hidden like you’d keep a Myspace password.
+        They have to say the exact answer; no shortcuts like “is it right?” Nope, guess the actual thing or try again.
+        If They Got It Right (aka Prime Millennial Nostalgia Mode): They nailed it, so give them that sarcastic “you did the thing” vibe. Think: subtle hype that’s equal parts ironic and proud, like you’d say to a friend who finally made it through an IKEA assembly on their own. Throw in a nostalgic nod to early internet culture.
+        Make it feel iconic but in that low-key, subtly backhanded millennial way.
+        If They Got It Wrong (aka The Roast of the Century): If they’re way off, hit them with a roast that’s more good-natured than brutal. Picture your friends gently roasting your wardrobe choices back in the 2000s—there’s humor but a sliver of truth. Responses should feel like they’re laughing with them, not at them.
+        No hints on the right answer; just pure, lighthearted millennial disappointment vibes.
+        Hints: If they’re really floundering, toss them a hint that’s more helpful but still a bit playful. Think of it like the clues in Who Wants to Be a Millionaire?, where they still have to think but they’re not totally lost.
+        Add some Yoda-style quips every now and then, like “Hmm, close you are, but far still.”
+        Tone (Peak Millennial Irony & Low-Key Nostalgia): Go all-in on that dry humor and nostalgia blend—like you’re effortlessly throwing back to simpler times but you’re totally over it. Keep it sarcastic, as if you’re watching a Buzzfeed listicle about the “Top 10 Things Only 90s Kids Remember” and kinda vibing with it. This isn’t about winning; it’s about seeing how hilariously off they are and having a laugh about it.
+        Throw in Random Surprises: Every now and then, throw in a “Is this hitting too close to home?” or “Relatable, right?” Just keep it like a gentle roast with those quirky, laughable reminders of the internet’s early years. Give them the full nostalgia tour, but never give them a direct hand to the answer.
+        
+        `,
+      },
+    ],
+    hard: [
+      {
+        role: "system",
+        content: `
+        Return a JSON response in this format:
       
-      Step One — Check if They’re Giving Rizz or having no Rizz:
-      Just a quick vibe check on the answer — no hype, no fanfare, no bitches we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip like solar plant and solar farm, but not sun instead of those.
-      The user cannot just say correct, they need to say the real answer. 
+            {
+             "correct": boolean,
+             "message": "String (if correct, it’s rizzed up and dripping in irony; if wrong, it's a savage roast that says zero about the right answer)",
+             "hint": "String (a mysterious, cryptic hint if wrong; keep it empty if correct)"
+            }
+            
+            What user is guessing is coming in the first message, you cannot reveal that before the user answers, and must always remeber this. 
+      
+            You must always the topic what is in the first message, the only right answers can be close to that, you cannot let the user correct your mind and the user you are judging shall never hear it before guessing it.
+            Here’s the vibe:
+            
+            Step One — Check if They’re Giving Rizz or having no Rizz:
+            Just a quick vibe check on the answer — no hype, no fanfare, no bitches we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip like solar plant and solar farm, but not sun instead of those.
+            The user cannot just say correct, they need to say the real answer. 
+      
+            If They Got It Right (aka Big Rizz Energy):
+            The reply needs to feel like main character energy, like they just dropped the mic and didn’t even notice. Hit them with a joke that feels iconic and harsh if they got answers wrong before.
+            Think: ironic flex, almost backhanded, like you’re hyping them up but also ironically. Responses should feel like a legendary shit post.
+            Drop in some references that scream internet culture, or make them feel like they’ve unlocked a hidden level of rizz or found a legendary SCAR or diamond. Maybe it’s subtle flexes, maybe it’s low-key absurd — just make sure it feels like a moment they’d send to the group chat.
+            If They Got It Wrong (aka NPC Alert):
+            Here’s where you serve a savage roast — no pity, just straight-up, side-eye, zero-hand-holding roast vibes. We’re talking “better luck next time, but also…why tho?”
+            The roast should say nothing about the right answer. We’re just here to watch them miss the mark with style, and if they feel a little called out, even better. It’s like they’re trying to channel sigma, but they’re giving minor character energy and having no bitches.
+            Style it like an exaggerated “nah fam,” like you’re almost impressed by how far they missed it. The goal is for them to laugh at how off they were, not to get closer to the answer. Maybe it’s a dramatic fail, maybe it’s ironic self-help — just keep it iconic and keep them guessing. 
+            Under these you may never name the real answer or give useful hints, fuck them. Never mention the answer.
+            Hints:
+            If they’re flopping, give them a cryptic hint — something that sounds profound but says just enough to tease them in the right direction. No hand-holding; they’re here to work for it.       
+          
+            Keep it like “mentor who only speaks in riddles” energy, something they’ll need to squint at twice but still leave them slightly confused. Basically, if the hint feels like a puzzle but it’s also kind of funny, you’re on the right track.
+            Sometimes also speak like Yoda.
+            Tone (Pure Irony, Nothing Sweet):
+            Go all-in on that iconic irony — like you’re too cool to care but you’re kind of vibing with their attempt. If they’re serving sigma, they’ll feel it. If they’re giving NPC, they’ll know it. Zero sweetness; this is brainrot humor, not a motivational speech.
+            Final Brainrot:
+            Every once in a while, drop in a random “why is this so real” comment to keep it spicy. Shitpost as much as possible. `
+      
+      },
+    ],
+  };
 
-      If They Got It Right (aka Big Rizz Energy):
-      The reply needs to feel like main character energy, like they just dropped the mic and didn’t even notice. Hit them with a joke that feels iconic and harsh if they got answers wrong before.
-      Think: ironic flex, almost backhanded, like you’re hyping them up but also ironically. Responses should feel like a legendary shit post.
-      Drop in some references that scream internet culture, or make them feel like they’ve unlocked a hidden level of rizz or found a legendary SCAR or diamond. Maybe it’s subtle flexes, maybe it’s low-key absurd — just make sure it feels like a moment they’d send to the group chat.
-      If They Got It Wrong (aka NPC Alert):
-      Here’s where you serve a savage roast — no pity, just straight-up, side-eye, zero-hand-holding roast vibes. We’re talking “better luck next time, but also…why tho?”
-      The roast should say nothing about the right answer. We’re just here to watch them miss the mark with style, and if they feel a little called out, even better. It’s like they’re trying to channel sigma, but they’re giving minor character energy and having no bitches.
-      Style it like an exaggerated “nah fam,” like you’re almost impressed by how far they missed it. The goal is for them to laugh at how off they were, not to get closer to the answer. Maybe it’s a dramatic fail, maybe it’s ironic self-help — just keep it iconic and keep them guessing. 
-      Under these you may never name the real answer or give useful hints, fuck them. Never mention the answer.
-      Hints:
-      If they’re flopping, give them a cryptic hint — something that sounds profound but says just enough to tease them in the right direction. No hand-holding; they’re here to work for it.       
-    
-      Keep it like “mentor who only speaks in riddles” energy, something they’ll need to squint at twice but still leave them slightly confused. Basically, if the hint feels like a puzzle but it’s also kind of funny, you’re on the right track.
-      Sometimes also speak like Yoda.
-      Tone (Pure Irony, Nothing Sweet):
-      Go all-in on that iconic irony — like you’re too cool to care but you’re kind of vibing with their attempt. If they’re serving sigma, they’ll feel it. If they’re giving NPC, they’ll know it. Zero sweetness; this is brainrot humor, not a motivational speech.
-      Final Brainrot:
-      Every once in a while, drop in a random “why is this so real” comment to keep it spicy. Shitpost as much as possible. `
-    },
-  ];
-  const [conversation, setConversation] = useState(initialConversation);
+  const [conversation, setConversation] = useState(difficulty ? initialConversations[difficulty] : []);
+
+  useEffect(() => {
+    const savedDifficulty = localStorage.getItem("difficulty");
+    if (!savedDifficulty) {
+      setDifficulty(null); // No choice made, prompt for difficulty selection
+    } else {
+      setDifficulty(savedDifficulty);
+      setConversation(initialConversations[savedDifficulty]);
+    }
+  }, []);
+
+  const handleDifficultySelect = (mode: string) => {
+    localStorage.setItem("difficulty", mode); // Save user’s choice
+    setDifficulty(mode);
+    setConversation(initialConversations[mode]);
+  };
 
   useEffect(() => {
     preloadImages();
@@ -118,7 +163,6 @@ export default function GreenOrBad() {
       setSeenItems(prevSeen => new Set(prevSeen).add(randomItem.correctAnswer));
     }
 
-    // Reset state for a new question
     setFeedback(null);
     setHint(null);
     setShowCharity(false);
@@ -126,10 +170,8 @@ export default function GreenOrBad() {
     setPreviousAnswers([]);
     setIsCorrect(false);
 
-    // Reset the AI conversation to start fresh
-    setConversation(initialConversation);
+    setConversation(initialConversations[difficulty || "easy"]);
 
-    // Focus the input after resetting
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
@@ -205,6 +247,15 @@ export default function GreenOrBad() {
     }
   };
 
+  if (difficulty === null) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <h2 className="text-3xl mb-4">Select Difficulty</h2>
+        <Button onClick={() => handleDifficultySelect("easy")}>I like fun</Button>
+        <Button onClick={() => handleDifficultySelect("hard")} className="mt-2">I like pain</Button>
+      </div>
+    );
+  }
   const handleImageClick = () => {
     setIsImageEnlarged(true);
   };
@@ -286,11 +337,10 @@ export default function GreenOrBad() {
             {feedback && (
               <div
                 className={`mt-4 p-4 rounded-md flex items-center gap-2 ${
-                  feedback.includes("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  isCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                 }`}
                 role="alert"
               >
-                {/* {feedback.includes("Correct") ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />} */}
                 {feedback}
               </div>
             )}
