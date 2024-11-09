@@ -2,44 +2,60 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-if (!process.env.MONGODB_URI || !process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD) {
-  throw new Error('MongoDB configuration is incomplete');
+if (!process.env.MONGODB_URI) {
+  throw new Error('MONGODB_URI is required');
 }
 
-const uri = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@junction2024-environmen.oghgp.mongodb.net/?retryWrites=true&w=majority`;
-
-const client = new MongoClient(uri, {
+const client = new MongoClient(process.env.MONGODB_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
+  ssl: true,
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  retryWrites: true,
+  w: 'majority',
+  minPoolSize: 1,
+  maxPoolSize: 10,
+  connectTimeoutMS: 30000,
+  socketTimeoutMS: 30000,
 });
+
+let dbConnection: any = null;
 
 export const connectDB = async () => {
   try {
+    if (dbConnection) {
+      return dbConnection;
+    }
+
+    console.log('Connecting to MongoDB...');
     await client.connect();
-    console.log("Connected to MongoDB");
-    const db = client.db('junction2024');
+    dbConnection = client.db('junction2024');
+    console.log('Successfully connected to MongoDB.');
     
-    // Test the connection with a simple operation
-    await db.command({ ping: 1 });
-    console.log("Database connection test successful");
-    
-    return db;
+    return dbConnection;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    console.error('MongoDB connection error:', {
+      error,
+      uri: process.env.MONGODB_URI?.substring(0, 20) + '...',
+      env: process.env.NODE_ENV
+    });
     throw error;
   }
 };
 
-// Add a cleanup function
-export const closeDB = async () => {
+// Add connection cleanup
+process.on('SIGINT', async () => {
   try {
     await client.close();
-    console.log("MongoDB connection closed");
-  } catch (error) {
-    console.error('Error closing MongoDB connection:', error);
+    console.log('MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during MongoDB connection closure:', err);
+    process.exit(1);
   }
-}; 
+}); 
