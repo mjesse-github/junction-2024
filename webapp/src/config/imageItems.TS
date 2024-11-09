@@ -22,6 +22,16 @@ export type ImageItem = {
       },
     },
     {
+      imageName: "landfill2.png",
+      correctAnswer: "Landfill2",
+      description: "somerhinget",
+      category: "Waste Management",
+      charity: {
+        name: "Clean Up The World",
+        url: "https://www.cleanuptheworld.org/"
+      },
+    },
+    {
       imageName: "solar-farm-1.png",
       correctAnswer: "Solar Farm",
       description: "A solar farm, whichs picture looks like it could skyscrapers",

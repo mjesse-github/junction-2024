@@ -181,7 +181,7 @@ Step-by-Step Breakdown:
         <CardContent>
           <div className="flex flex-col gap-4">
             <img
-              src={currentItem.image}
+              src={getImagePath(currentItem.imageName)}
               alt={currentItem.description}
               className="w-full h-auto object-cover rounded-md"
             />
