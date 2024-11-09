@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
 import Groq from "groq-sdk";
-// require("dotenv").config();
+import { getImagePath } from '@/utils/paths'
 
 const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY, dangerouslyAllowBrowser: true});
 
