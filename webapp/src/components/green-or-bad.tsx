@@ -157,7 +157,7 @@ export default function GreenOrBad() {
     ],
   };
 
-  const [conversation, setConversation] = useState<Array<{ role: string; content: string; }>>([]);
+  const [conversation, setConversation] = useState<Array<ChatMessage>>([]);
 
   const handleDifficultySelect = (mode: 'easy' | 'hard') => {
     setDifficulty(mode);
@@ -182,28 +182,39 @@ export default function GreenOrBad() {
 
   const pickRandomUnseenItem = () => {
     const unseenItems = imageItems.filter(item => !seenItems.has(item.correctAnswer));
-
+  
     if (unseenItems.length === 0) {
       setSeenItems(new Set());
-      const currentItem = imageItems[Math.floor(Math.random() * imageItems.length)]
-      setCurrentItem(currentItem);
+      const randomItem = imageItems[Math.floor(Math.random() * imageItems.length)];
+      setCurrentItem(randomItem);
     } else {
       const randomItem = unseenItems[Math.floor(Math.random() * unseenItems.length)];
       setCurrentItem(randomItem);
       setSeenItems(prevSeen => new Set(prevSeen).add(randomItem.correctAnswer));
     }
-
+  
+    // Reset state variables for new item
     setFeedback(null);
     setHint(null);
     setShowCharity(false);
     setUserAnswer("");
     setPreviousAnswers([]);
     setIsCorrect(false);
-
-    setConversation(initialConversations[difficulty || "easy"]);
-
+  
+    // Set conversation with the current item details if available
+    if (currentItem) {
+      setConversation([
+        ...initialConversations[difficulty || "easy"],
+        {
+          role: "system",
+          content: `The answer to the question is ${currentItem.correctAnswer}, the description of the image is ${currentItem.description}, and the category is ${currentItem.category}`
+        }
+      ]);
+    }
+  
+    // Focus input after setting a new question
     setTimeout(() => inputRef.current?.focus(), 0);
-  };
+  };  
 
   const decider = async (guess: string) => {
     if (!currentItem) return;
