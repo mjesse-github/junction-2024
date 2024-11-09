@@ -6,13 +6,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
-<<<<<<< HEAD
-import { getImagePath } from '@/utils/paths';
-=======
 import { motion, AnimatePresence } from "framer-motion";
-
 import { getImagePath } from '@/utils/paths'
->>>>>>> f5020a527c350682b11956c6eef902f87b20e36d
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
 
