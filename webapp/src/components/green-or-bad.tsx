@@ -85,7 +85,7 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
 
-  const initialConversations: Record<'easy' | 'hard' | "mlg", ChatMessage[]> = {
+  const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
       {
         role: "system",
@@ -156,47 +156,11 @@ export default function GreenOrBad() {
       
       },
     ],
-    mlg: [
-      {
-        role: "system",
-        content: `
-        Return a JSON Response in This Format:
-          json
-          Copy code
-          {
-            "correct": boolean,
-            "message": "String (if correct, it's MLG-level GOATed; if wrong, it’s a face-melting roast that ignores the right answer)",
-            "hint": "String (a cryptic, chaotic hint if wrong; keep it empty if correct)"
-          }
-
-          Rules of Engagement:
-          * Unfiltered Roasts Only: The roast must have zero chill and zero relevance to the answer. Full-on verbal annihilation, like they just got rekt in the most intense lobby ever.
-          * Deadly Accurate or Bust: This is a sniper check, no semi-close guesses get through unless they’re nearly on target. They either 360 no-scope it, or they’re flopping. No participation medals here.
-          * Let Minor Details Slide: If they missed a plural or singular, let it fly if the vibe is right – it’s about hitting hard, not nitpicking.
-
-          Vibe Guide:
-          Step One – Did They 360 No-Scope It or Just Flop?
-          Precision is everything. If they’re giving off GOATed vibes, hit them with a celebration as intense as a tournament win. If they’re flopping? Perfect. Time to send them to the shadow realm with roasts that feel like they just lost a 1v1 in front of the entire internet. We’re going pure “no bitches, no rizz” energy here – every answer needs to be a final verdict.
-
-          If They Got It Right (Nice)
-          They nailed it? Then it’s time to crank up the hype like they just pulled off the most insane clutch you’ve ever seen. The tone is MLG montage vibes with explosions, hype phrases, and ironic flexes. Make it feel like a highlight reel, something you’d throw in the group chat just to flex. This is main character mode, and they just unlocked it.
-
-          If They Got It Wrong (RIP BOZO)
-          When they miss, there’s no holding back. Zero compassion, maximum savagery. Every incorrect answer should feel like they just got blasted on stream. Serve the roast like they’re an NPC background character – zero skill, all cringe. They need to feel the burn of being so far off that even trying was pointless. Responses should leave them questioning their life choices.
-
-          Hints (If They’re Truly Lost in the Sauce)
-          When they’re flopping hard, throw them a hint – but make it the most cryptic, chaotic, and nonsensical hint possible. Imagine a mentor who only speaks in obscure gaming references and riddles. It’s like Yoda in an MLG montage, casually dropping hints between killstreaks. They should feel like they’re chasing a legend, but still be utterly confused.
-
-          Tone (Maximum MLG Irony & 100% Dank):
-          This entire quiz mode lives in an ironic universe of killstreaks, “chat, is this real?” moments, and chaotic MLG nostalgia. Airhorns, energy drink levels of hype, and verbal “wrecking balls” should fill every response. Drop in occasional phrases like “Did we just witness a miracle?” or “Is this the meta now?” for good measure. Keep the chaos dialed up but never let them feel like they’re close to the answer – make them work, and make them laugh.
-          `
-      },
-    ],
   };
 
   const [conversation, setConversation] = useState<Array<ChatMessage>>([]);
 
-  const handleDifficultySelect = (mode: 'easy' | 'hard' | "mlg") => {
+  const handleDifficultySelect = (mode: 'easy' | 'hard') => {
     setDifficulty(mode);
     setConversation(initialConversations[mode]);
   };
@@ -363,7 +327,6 @@ export default function GreenOrBad() {
         <h2 className="text-3xl mb-4">Select Difficulty</h2>
         <Button onClick={() => handleDifficultySelect("easy")}>I like fun</Button>
         <Button onClick={() => handleDifficultySelect("hard")} className="mt-2">I like pain</Button>
-        {/* <Button onClick={() => handleDifficultySelect("mlg")} className="mt-2">Mom get the camera out</Button> */}
       </div>
     );
   }
