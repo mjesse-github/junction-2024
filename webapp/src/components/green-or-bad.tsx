@@ -6,10 +6,29 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
-import Groq from "groq-sdk";
+
 import { getImagePath } from '@/utils/paths'
 
-const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY, dangerouslyAllowBrowser: true});
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export const grokApi = {
+  async chat(messages: any[]) {
+    const response = await fetch(`${API_URL}/api/groq/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to chat with Groq');
+    }
+
+    return response.json();
+  }
+};
+
 
 export default function GreenOrBad() {
   const [currentItem, setCurrentItem] = useState<ImageItem | null>(null);
@@ -107,50 +126,43 @@ Step-by-Step Breakdown:
       return;
     }
 
-    // Add the user's guess to the conversation
     const updatedConversation = [
       ...conversation,
       { role: "user", content: `Answer: ${guess}` },
+      {
+        role: "user",
+        content: JSON.stringify({
+          correctAnswer: currentItem.correctAnswer,
+          topic: "Waste or Taste",
+        }),
+      },
     ];
 
-    // Send the entire conversation history to Groq
-    const response = await groq.chat.completions.create({
-      messages: [
+    try {
+      const response = await grokApi.chat(updatedConversation);
+      const result = JSON.parse(response.content);
+
+      setConversation([
         ...updatedConversation,
-        {
-          role: "user",
-          content: JSON.stringify({
-            correctAnswer: currentItem.correctAnswer,
-            topic: "Waste or Taste",
-          }),
-        },
-      ],
-      model: "llama3-8b-8192",
-      temperature: 0.7,
-      stream: false,
-      response_format: { type: "json_object" },
-    });
+        { role: "assistant", content: JSON.stringify(result) },
+      ]);
 
-    const result = JSON.parse(response.choices[0].message.content);
-
-    // Add the AI's response to the conversation
-    setConversation([
-      ...updatedConversation,
-      { role: "assistant", content: JSON.stringify(result) },
-    ]);
-
-    if (result.correct) {
-      setFeedback(`✅ ${result.message}`);
-      setHint(null);
-      setScore(prevScore => prevScore + 1);
-      setTotalQuestions(prevTotal => prevTotal + 1);
-      setShowCharity(true);
-      setUserAnswer(currentItem.correctAnswer);
-      setIsCorrect(true);
-    } else {
-      setFeedback(`❌ ${result.message}`);
-      setHint(result.hint || "💡 Here's a hint to help you out!");
-      setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+      if (result.correct) {
+        setFeedback(`✅ ${result.message}`);
+        setHint(null);
+        setScore(prevScore => prevScore + 1);
+        setTotalQuestions(prevTotal => prevTotal + 1);
+        setShowCharity(true);
+        setUserAnswer(currentItem.correctAnswer);
+        setIsCorrect(true);
+      } else {
+        setFeedback(`❌ ${result.message}`);
+        setHint(result.hint || "💡 Here's a hint to help you out!");
+        setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      setFeedback('Failed to process your answer. Please try again.');
     }
   };
 
