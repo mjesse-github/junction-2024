@@ -22,10 +22,10 @@ export type ImageItem = {
       },
     },
     {
-      imageName: "landfill2.png",
-      correctAnswer: "Landfill2",
-      description: "somerhinget",
-      category: "Waste Management",
+      imageName: "circular-farm.jpg",
+      correctAnswer: "Circular Farm",
+      description: "Circular Farm in Kansas",
+      category: "Farming",
       charity: {
         name: "Clean Up The World",
         url: "https://www.cleanuptheworld.org/"
