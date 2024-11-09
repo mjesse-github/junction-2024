@@ -130,6 +130,7 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
@@ -359,27 +360,25 @@ export default function GreenOrBad() {
     }
   };
 
-  const handleImageClick = useCallback(() => {
-    if (!currentItem) return;
+  const handleImageClick = () => {
+    console.log('Image clicked'); // Debug log
     setIsImageEnlarged(true);
-  }, [currentItem]);
+  };
 
-  const handleCloseModal = useCallback(() => {
+  const handleCloseModal = () => {
     setIsImageEnlarged(false);
-  }, []);
-
-  const handleKeyDownModal = useCallback((event: KeyboardEvent) => {
-    if (isImageEnlarged) {
-      handleCloseModal();
-    }
-  }, [isImageEnlarged, handleCloseModal]);
+  };
 
   useEffect(() => {
-    if (isImageEnlarged) {
-      document.addEventListener('keydown', handleKeyDownModal);
-      return () => document.removeEventListener('keydown', handleKeyDownModal);
-    }
-  }, [isImageEnlarged, handleKeyDownModal]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isImageEnlarged) {
+        setIsImageEnlarged(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isImageEnlarged]);
 
   const handleStartGame = () => {
     setShowLanding(false);
@@ -396,6 +395,31 @@ export default function GreenOrBad() {
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isCorrect, pickRandomUnseenItem]);
+
+  const openImageModal = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    setIsImageModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsImageModalOpen(false);
+  };
+
+  useEffect(() => {
+    const handleModalKeyDown = (e: KeyboardEvent) => {
+      if (isImageModalOpen) {
+        handleModalClose();
+      }
+    };
+
+    if (isImageModalOpen) {
+      window.addEventListener('keydown', handleModalKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleModalKeyDown);
+    };
+  }, [isImageModalOpen]);
 
   if (showLanding) {
     return (
@@ -537,46 +561,59 @@ export default function GreenOrBad() {
   if (!currentItem) return null;
 
   return (
-    <div className="h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]" />
-
-      <motion.div
+    <div className="h-screen bg-black flex items-center justify-center p-3 relative overflow-y-auto md:overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))] fixed" />
+      
+      <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative z-10 w-full max-w-4xl h-[90vh] flex flex-col"
+        className="relative z-10 w-full max-w-6xl h-[85vh] flex flex-col"
       >
-        {/* Header - Now just the question title */}
-        <motion.h2
+        {/* Header - Reduced margin */}
+        <motion.h2 
           initial={{ y: 20 }}
           animate={{ y: 0 }}
-          className="text-3xl sm:text-4xl font-light tracking-tight text-white text-center mb-4"
+          className="text-2xl sm:text-3xl font-light tracking-tight text-white text-center mb-2"
         >
           <span className="bg-gradient-to-r from-emerald-200 to-emerald-400 bg-clip-text text-transparent">
             What is on the picture?
           </span>
         </motion.h2>
 
-        {/* Main content - Using flex-grow to take available space */}
-        <div className="flex-grow relative px-6 py-4 border border-white/10 rounded-xl bg-black/50 backdrop-blur-sm flex flex-col">
-          {/* Image section - Using relative height */}
-          <div className="relative h-[45vh] mb-4 group">
-            <motion.img
-              src={getImagePath(currentItem?.imageName || '')}
-              alt={currentItem?.description || ''}
-              className="absolute inset-0 w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:scale-[1.01]"
-              onClick={handleImageClick}
+        {/* Main content */}
+        <div className="flex-grow relative px-3 sm:px-4 py-3 border border-white/10 rounded-xl bg-black/50 backdrop-blur-sm flex flex-col">
+          {/* Image section */}
+          <div 
+            className="relative w-full max-w-2xl mx-auto aspect-[16/9] mb-3 group 
+                       sm:max-w-[85%] md:max-w-[75%] lg:max-w-[65%]"
+          >
+            <div 
+              onClick={openImageModal}
+              onKeyDown={(e) => e.key === 'Enter' && openImageModal(e)}
+              className="absolute inset-0 cursor-pointer"
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && handleImageClick()}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg" />
+            >
+              <motion.img
+                src={getImagePath(currentItem?.imageName || '')}
+                alt={currentItem?.description || ''}
+                className="absolute inset-0 w-full h-full object-cover rounded-lg transition-all duration-300 
+                          group-hover:scale-[1.01] group-hover:brightness-110"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg" />
+              
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/50 px-3 py-1.5 rounded-full text-white/80 text-sm backdrop-blur-sm">
+                  Click to enlarge
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Input and feedback section - Reordered elements */}
-          <div className="space-y-3 flex-shrink-0">
-            {/* Hint */}
+          {/* Input and feedback section */}
+          <div className="space-y-2 flex-shrink-0 max-w-3xl mx-auto w-full">
             {hint && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -587,14 +624,12 @@ export default function GreenOrBad() {
               </motion.div>
             )}
 
-            {/* Previous answers - Moved here */}
             {previousAnswers.length > 0 && (
               <div className="text-center text-white/40 text-xs font-light">
                 Previous attempts: {previousAnswers.join(" • ")}
               </div>
             )}
 
-            {/* Input field and submit button */}
             <div className="flex gap-2">
               <input
                 ref={inputRef}
@@ -604,33 +639,32 @@ export default function GreenOrBad() {
                 onKeyDown={handleKeyDown}
                 placeholder="Enter your answer"
                 disabled={isCorrect || isSubmitting}
-                className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30
-                           focus:outline-none focus:border-emerald-500/50 transition-all duration-300"
+                className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30
+                          focus:outline-none focus:border-emerald-500/50 transition-all duration-300"
                 aria-label="Your answer"
               />
               <motion.button
                 onClick={handleSubmit}
                 disabled={isCorrect || !userAnswer.trim() || isSubmitting}
-                className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-lg text-white
-                           disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300
-                           hover:from-emerald-400 hover:to-emerald-300"
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-lg text-white
+                          disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300
+                          hover:from-emerald-400 hover:to-emerald-300"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {isSubmitting ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Send className="h-5 w-5" />
+                  <Send className="h-4 w-4" />
                 )}
               </motion.button>
             </div>
 
-            {/* Feedback message - Compact version */}
             {feedback && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-3 rounded-lg backdrop-blur-sm text-sm ${
+                className={`p-2.5 rounded-lg backdrop-blur-sm text-sm ${
                   feedback.includes("✅") 
                     ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20" 
                     : "bg-rose-500/10 text-rose-300 border border-rose-500/20"
@@ -640,15 +674,15 @@ export default function GreenOrBad() {
               </motion.div>
             )}
 
-            {/* Charity section - Shown only when correct */}
+            {/* Charity section - Now inside the main box */}
             {showCharity && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg backdrop-blur-sm"
+                className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg backdrop-blur-sm"
               >
                 <h3 className="text-lg font-light text-blue-300 mb-2">Did you know?</h3>
-                <p className="text-white/80 text-sm mb-2">{currentItem.charity.fact}</p>
+                <p className="text-white/80 text-sm mb-3">{currentItem.charity.fact}</p>
                 <a
                   href={currentItem.charity.url}
                   target="_blank"
@@ -662,15 +696,15 @@ export default function GreenOrBad() {
           </div>
         </div>
 
-        {/* Updated footer with combined score and question number */}
-        <div className="mt-4 flex items-center justify-center gap-8">
-          <div className="flex items-center gap-4">
+        {/* Footer - Adjusted for mobile */}
+        <div className="mt-4 flex items-center justify-center gap-4 flex-wrap px-2">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
             <p className="text-white/40 text-sm">
               Question {totalQuestions + 1}
             </p>
-            <div className="h-4 w-[1px] bg-white/10" /> {/* Vertical divider */}
+            <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
             <div className="flex items-center gap-2">
-              <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="w-24 sm:w-32 h-1 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
                   initial={{ width: 0 }}
@@ -700,25 +734,39 @@ export default function GreenOrBad() {
 
       {/* Image modal */}
       <AnimatePresence>
-        {isImageEnlarged && currentItem && (
+        {isImageModalOpen && currentItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-            onClick={handleCloseModal}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 cursor-pointer"
+            onClick={handleModalClose}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && handleModalClose()}
           >
-            <motion.img
-              src={getImagePath(currentItem.imageName)}
-              alt={currentItem.description}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-            />
-            <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 text-sm">
-              Click anywhere to close
-            </p>
+              className="relative max-w-[90vw] max-h-[90vh]"
+            >
+              <img
+                src={getImagePath(currentItem.imageName)}
+                alt={currentItem.description}
+                className="w-full h-full object-contain rounded-lg"
+              />
+              
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full
+                           text-white/60 text-sm backdrop-blur-sm whitespace-nowrap pointer-events-none"
+              >
+                Click anywhere or press any key to close
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
