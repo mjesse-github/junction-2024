@@ -119,18 +119,7 @@ export default function GreenOrBad() {
 
   const [conversation, setConversation] = useState(difficulty ? initialConversations[difficulty] : []);
 
-  useEffect(() => {
-    const savedDifficulty = localStorage.getItem("difficulty");
-    if (!savedDifficulty) {
-      setDifficulty(null); // No choice made, prompt for difficulty selection
-    } else {
-      setDifficulty(savedDifficulty);
-      setConversation(initialConversations[savedDifficulty]);
-    }
-  }, []);
-
   const handleDifficultySelect = (mode: string) => {
-    localStorage.setItem("difficulty", mode); // Save user’s choice
     setDifficulty(mode);
     setConversation(initialConversations[mode]);
   };
@@ -250,30 +239,31 @@ export default function GreenOrBad() {
     );
   }
 
-const handleImageClick = () => {
-  setIsImageEnlarged(true);
-};
-
-const handleCloseModal = useCallback(() => {
-  setIsImageEnlarged(false);
-}, []);
-
-useEffect(() => {
-  const handleKeyDown = (event: KeyboardEvent) => {
-    // Check if the Escape key was pressed
-    if (event.key === 'Escape' && isImageEnlarged) {
-      handleCloseModal();
-    }
+  const handleImageClick = () => {
+    setIsImageEnlarged(true);
   };
 
-  if (isImageEnlarged) {
-    document.addEventListener('keydown', handleKeyDown);
-  }
+  // const handleCloseModal = useCallback(() => {
+  //   setIsImageEnlarged(false);
+  // }, []);
 
-  return () => {
-    document.removeEventListener('keydown', handleKeyDown);
-  };
-}, [isImageEnlarged, handleCloseModal]);
+  // useEffect(() => {
+  //   const handleKeyDown = (event: KeyboardEvent) => {
+  //     if (isImageEnlarged) {
+  //       handleCloseModal();
+  //     }
+  //   };
+
+  //   if (isImageEnlarged) {
+  //     document.addEventListener('keydown', handleKeyDown);
+  //   }
+
+  //   return () => {
+  //     document.removeEventListener('keydown', handleKeyDown);
+  //   };
+  // }, [isImageEnlarged, handleCloseModal]);
+
+if (!currentItem) return null;
 
   if (!currentItem) return null;
 
