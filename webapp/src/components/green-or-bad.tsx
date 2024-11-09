@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-react";
 import { imageItems, ImageItem } from "@/config/imageItems";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { getImagePath } from '@/utils/paths'
 
@@ -43,6 +44,7 @@ export default function GreenOrBad() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isImageEnlarged, setIsImageEnlarged] = useState(false);
 
   // Initial system message for the conversation
   const initialConversation = [
@@ -203,11 +205,35 @@ export default function GreenOrBad() {
     }
   };
 
+  const handleImageClick = () => {
+    setIsImageEnlarged(true);
+  };
+
+  const handleCloseModal = useCallback(() => {
+    setIsImageEnlarged(false);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isImageEnlarged) {
+        handleCloseModal();
+      }
+    };
+
+    if (isImageEnlarged) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isImageEnlarged, handleCloseModal]);
+
   if (!currentItem) return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <h1 className="text-6xl font-bold mb-8 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent animate-fade-in relative">
+      <h1 className="text-left text-6xl font-bold mb-8 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent animate-fade-in relative">
         Waste or Taste
         <span className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-full transform scale-x-0 animate-scale-in"></span>
       </h1>
@@ -221,7 +247,8 @@ export default function GreenOrBad() {
             <img
               src={getImagePath(currentItem.imageName)}
               alt={currentItem.description}
-              className="w-full h-auto object-cover rounded-md"
+              className="w-full h-auto object-cover rounded-md cursor-pointer transition-transform hover:scale-[1.02]"
+              onClick={handleImageClick}
             />
             {hint && <p className="text-center text-sm text-gray-600 mt-2">Hint: {hint}</p>}
             <div className="flex gap-4 mt-4">
@@ -296,6 +323,35 @@ export default function GreenOrBad() {
           )}
         </CardFooter>
       </Card>
+
+      {/* Image Modal */}
+      <AnimatePresence>
+        {isImageEnlarged && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer"
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative w-full max-w-4xl p-4"
+            >
+              <img
+                src={getImagePath(currentItem.imageName)}
+                alt={currentItem.description}
+                className="w-full h-auto object-contain rounded-lg"
+              />
+              <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+                Click anywhere or press any key to close
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
