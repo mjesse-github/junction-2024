@@ -13,7 +13,6 @@ const client = new MongoClient(process.env.MONGODB_URI, {
     strict: true,
     deprecationErrors: true,
   },
-  // SSL/TLS options
   tls: true,                   // Use TLS for connection
   ssl: true,                   // Required for some MongoDB Atlas clusters
   retryWrites: true,
