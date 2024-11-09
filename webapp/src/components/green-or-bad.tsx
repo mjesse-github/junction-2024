@@ -70,7 +70,8 @@ Step-by-Step Breakdown:
   const preloadImages = () => {
     imageItems.forEach(item => {
       const img = new Image();
-      img.src = getImagePath(item.imageNmae);
+      const src = getImagePath(item.imageName);
+      img.src = src;
     });
   };
 
