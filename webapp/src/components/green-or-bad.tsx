@@ -87,7 +87,6 @@ export default function GreenOrBad() {
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
   const [recentGuesses, setRecentGuesses] = useState<any[]>([]);
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
