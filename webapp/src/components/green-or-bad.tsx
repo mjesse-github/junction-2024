@@ -11,36 +11,61 @@ import { getImagePath } from '@/utils/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
 
+// First, let's type the conversation messages
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 export const backend = {
-  async chat(messages: any[]) {
-    const response = await fetch(`${API_URL}/api/groq/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ messages }),
-    });
+  async chat(messages: ChatMessage[]) {
+    try {
+      const response = await fetch(`${API_URL}/api/groq/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages }),
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to chat with Groq');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw new Error('Failed to communicate with the server. Please try again.');
     }
-
-    return response.json();
   },
-  async submitResponse(userResponse: any) {
-    const response = await fetch(`${API_URL}/api/groq/storeAnswer`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userResponse),
-    });
 
-    if (!response.ok) {
-      throw new Error('Failed to chat with Groq');
+  async submitResponse(userResponse: {
+    user_id: string | null;
+    image_id: string;
+    category: string;
+    guess: string;
+    is_correct: boolean;
+  }) {
+    try {
+      const response = await fetch(`${API_URL}/api/groq/storeAnswer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userResponse),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Store answer failed:', error);
+      throw new Error('Failed to save your answer. Please try again.');
     }
-
-    return response.json();
   }
 };
 
@@ -188,49 +213,57 @@ export default function GreenOrBad() {
     try {
       if (previousAnswers.includes(guess.toLowerCase())) {
         setFeedback("⚠️ You have already tried this answer.");
-        setIsSubmitting(false);
-        inputRef.current?.focus();
         return;
       }
 
-      const updatedConversation = [
+      const updatedConversation: ChatMessage[] = [
         ...conversation,
-        { role: "user", content: `The right answer is "${currentItem.correctAnswer}", The User guessed: "${guess}"` },
+        { 
+          role: "user", 
+          content: `The right answer is "${currentItem.correctAnswer}", The User guessed: "${guess}"` 
+        },
       ];
-      const response = await backend.chat(updatedConversation);
-      const result = JSON.parse(response.content);
-      //maybe even no need to oawait
-      const rr  = await backend.submitResponse({
+
+      try {
+        const response = await backend.chat(updatedConversation);
+        const result = JSON.parse(response.content);
+
+        // Store the answer asynchronously but don't wait for it
+        backend.submitResponse({
           user_id: null,
           image_id: currentItem.imageName,
           category: currentItem.category,
-          guess: guess, 
+          guess: guess,
           is_correct: result.correct
-      }); 
+        }).catch(error => {
+          console.error('Failed to store answer:', error);
+        });
 
-      setConversation([
-        ...updatedConversation,
-        { role: "assistant", content: JSON.stringify(result) },
-      ]);
+        setConversation([
+          ...updatedConversation,
+          { role: "assistant", content: JSON.stringify(result) },
+        ]);
 
-      if (result.correct) {
-        setFeedback(`✅ ${result.message}`);
-        setHint(null);
-        setScore(prevScore => prevScore + 1);
-        setTotalQuestions(prevTotal => prevTotal + 1);
-        setShowCharity(true);
-        setUserAnswer(currentItem.correctAnswer);
-        setIsCorrect(true); 
-      } else {
-        setFeedback(`❌ ${result.message}`);
-        setHint(result.hint || "💡 Here's a hint to help you out!");
-        setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
-        // setLongAnswersOfOtherUsers();
-        //todo fetch async wrong answers to inspire. Or wehn correct?
+        if (result.correct) {
+          setFeedback(`✅ ${result.message}`);
+          setHint(null);
+          setScore(prev => prev + 1);
+          setTotalQuestions(prev => prev + 1);
+          setShowCharity(true);
+          setUserAnswer(currentItem.correctAnswer);
+          setIsCorrect(true);
+        } else {
+          setFeedback(`❌ ${result.message}`);
+          setHint(result.hint || "💡 Here's a hint to help you out!");
+          setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+        }
+      } catch (error) {
+        console.error('Chat processing error:', error);
+        setFeedback('⚠️ Failed to process your answer. Please try again.');
       }
     } catch (error) {
-      console.error('Chat error:', error);
-      setFeedback('Failed to process your answer. Please try again.');
+      console.error('Decider function error:', error);
+      setFeedback('⚠️ Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
       inputRef.current?.focus();
@@ -254,6 +287,28 @@ export default function GreenOrBad() {
     }
   };
 
+  const handleImageClick = useCallback(() => {
+    if (!currentItem) return;
+    setIsImageEnlarged(true);
+  }, [currentItem]);
+
+  const handleCloseModal = useCallback(() => {
+    setIsImageEnlarged(false);
+  }, []);
+
+  const handleKeyDownModal = useCallback((event: KeyboardEvent) => {
+    if (isImageEnlarged) {
+      handleCloseModal();
+    }
+  }, [isImageEnlarged, handleCloseModal]);
+
+  useEffect(() => {
+    if (isImageEnlarged) {
+      document.addEventListener('keydown', handleKeyDownModal);
+      return () => document.removeEventListener('keydown', handleKeyDownModal);
+    }
+  }, [isImageEnlarged, handleKeyDownModal]);
+
   if (difficulty === null) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
@@ -263,32 +318,6 @@ export default function GreenOrBad() {
       </div>
     );
   }
-
-  const handleImageClick = () => {
-    setIsImageEnlarged(true);
-  };
-
-  // const handleCloseModal = useCallback(() => {
-  //   setIsImageEnlarged(false);
-  // }, []);
-
-  // useEffect(() => {
-  //   const handleKeyDown = (event: KeyboardEvent) => {
-  //     if (isImageEnlarged) {
-  //       handleCloseModal();
-  //     }
-  //   };
-
-  //   if (isImageEnlarged) {
-  //     document.addEventListener('keydown', handleKeyDown);
-  //   }
-
-  //   return () => {
-  //     document.removeEventListener('keydown', handleKeyDown);
-  //   };
-  // }, [isImageEnlarged, handleCloseModal]);
-
-if (!currentItem) return null;
 
   if (!currentItem) return null;
 
@@ -307,10 +336,14 @@ if (!currentItem) return null;
           <div className="flex flex-col gap-3 sm:gap-4">
             <div className="relative aspect-[4/3] w-full">
               <img
-                src={getImagePath(currentItem.imageName)}
-                alt={currentItem.description}
+                src={getImagePath(currentItem?.imageName || '')}
+                alt={currentItem?.description || ''}
                 className="absolute inset-0 w-full h-full object-cover rounded-md cursor-pointer transition-transform hover:scale-[1.02]"
                 onClick={handleImageClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleImageClick()}
+                aria-label="Click to enlarge image"
               />
             </div>
 
@@ -356,13 +389,8 @@ if (!currentItem) return null;
 
             {feedback && (
               <div
-<<<<<<< HEAD
                 className={`mt-2 sm:mt-4 p-3 sm:p-4 rounded-md flex items-center gap-2 text-sm sm:text-base ${
-                  feedback.includes("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-=======
-                className={`mt-4 p-4 rounded-md flex items-center gap-2 ${
-                  isCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
->>>>>>> ea84355043f560b13c2fa593d549ef0cd6abd65e
+                  feedback.includes("✅") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                 }`}
                 role="alert"
               >
@@ -404,13 +432,15 @@ if (!currentItem) return null;
       </Card>
 
       <AnimatePresence>
-        {isImageEnlarged && (
+        {isImageEnlarged && currentItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer p-2 sm:p-4"
             onClick={handleCloseModal}
+            role="dialog"
+            aria-label="Enlarged image view"
           >
             <motion.div
               initial={{ scale: 0.9 }}
