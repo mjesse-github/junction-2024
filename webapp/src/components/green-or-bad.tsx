@@ -140,7 +140,7 @@ export default function GreenOrBad() {
             Here’s the vibe:
             
             Step One — Check if They’re Giving Rizz or getting Ls:
-            Just a quick vibe check on the answer — no hype, no fanfare we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip like solar plant and solar farm, but not sun instead of those.
+            Just a quick vibe check on the answer — no hype, no fanfare we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip.
             The user cannot just say correct, they need to say the real answer. 
             If the true answer is in plural and the guess is not, but otherwise it's fine, then let it go and vice verca.
       
