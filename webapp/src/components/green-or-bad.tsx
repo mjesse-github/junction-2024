@@ -157,9 +157,9 @@ export default function GreenOrBad() {
     ],
   };
 
-  const [conversation, setConversation] = useState(null);
+  const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
-  const handleDifficultySelect = (mode: string) => {
+  const handleDifficultySelect = (mode: 'easy' | 'hard') => {
     setDifficulty(mode);
     setConversation(initialConversations[mode]);
   };
@@ -259,7 +259,7 @@ export default function GreenOrBad() {
         }
       } catch (error) {
         console.error('Chat processing error:', error);
-        setFeedback('⚠️ Failed to process your answer. Please try again.');
+        setFeedback('⚠ Failed to process your answer. Please try again.');
       }
     } catch (error) {
       console.error('Decider function error:', error);
