@@ -17,8 +17,8 @@ export type ImageItem = {
       description: "A landfill site in the Nevada Desert",
       category: "Waste Management",
       charity: {
-        name: "Clean Up The World",
-        url: "https://www.cleanuptheworld.org/"
+        name: "Clean Up The World, one day a year",
+        url: "https://www.worldcleanupday.org"
       },
     },
     {
@@ -27,8 +27,8 @@ export type ImageItem = {
       description: "Circular Farm in Kansas",
       category: "Farming",
       charity: {
-        name: "Clean Up The World",
-        url: "https://www.cleanuptheworld.org/"
+        name: "Help fight world hunger",
+        url: "https://convoyofhope.org/articles/world-hunger-charities/"
       },
     },
     {
