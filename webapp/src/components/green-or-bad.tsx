@@ -70,7 +70,7 @@ export const backend = {
 };
 
 export default function GreenOrBad() {
-  const [difficulty, setDifficulty] = useState<string | null>(null); // Track difficulty
+  const [difficulty, setDifficulty] = useState<'easy' | 'hard' | null>(null); // Track difficulty
   const [currentItem, setCurrentItem] = useState<ImageItem | null>(null);
   const [seenItems, setSeenItems] = useState<Set<string>>(new Set());
   const [score, setScore] = useState(0);
@@ -85,7 +85,7 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
 
-  const initialConversations = {
+  const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
       {
         role: "system",
