@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, ExternalLink, Sparkles } from "lucide-react"
+import { getImagePath } from '@/utils/paths'
 
 type ImagePair = {
   image1: string
@@ -29,8 +30,8 @@ async function fetchImagePairs(): Promise<ImagePair[]> {
   // Temporary stub data
   return [
     {
-      image1: "/landfill.png",
-      image2: "/burning-man.png",
+      image1: getImagePath("/landfill.png"),
+      image2: getImagePath("/burning-man.png"),
       correctAnswer: "image1",
       description1: "Landfill",
       description2: "Burning man",
@@ -42,8 +43,8 @@ async function fetchImagePairs(): Promise<ImagePair[]> {
       title: "Pick the landfill"
     },
     {
-      image1: "/placeholder.svg?height=400&width=300",
-      image2: "/placeholder.svg?height=400&width=300",
+      image1: getImagePath("/placeholder.svg?height=400&width=300"),
+      image2: getImagePath("/placeholder.svg?height=400&width=300"),
       correctAnswer: "image1",
       description1: "Solar Farm",
       description2: "Computer Circuit Board",
