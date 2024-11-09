@@ -1,209 +1,206 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { AlertCircle, CheckCircle2, ExternalLink, Sparkles } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
+import { imageItems, ImageItem } from "@/config/imageItems";
+import Groq from "groq-sdk";
+// require("dotenv").config();
 
-type ImagePair = {
-  image1: string
-  image2: string
-  correctAnswer: "image1" | "image2"
-  description1: string
-  description2: string
-  location: string
-  charity: {
-    name: string
-    url: string
-  }
-  title: string
-}
-
-const imagePairs: ImagePair[] = [
-  {
-    image1: "/landfill.png",
-    image2: "/burning-man.png",
-    correctAnswer: "image1",
-    description1: "Landfill",
-    description2: "Burning man",
-    location: "Nevada Desert, USA",
-    charity: {
-      name: "Clean Up The World",
-      url: "https://www.cleanuptheworld.org/"
-    },
-    title: "Pick the landfill"
-  },
-  {
-    image1: "/placeholder.svg?height=400&width=300",
-    image2: "/placeholder.svg?height=400&width=300",
-    correctAnswer: "image1",
-    description1: "Solar Farm",
-    description2: "Computer Circuit Board",
-    location: "Mojave Desert, California",
-    charity: {
-      name: "Solar Aid",
-      url: "https://solar-aid.org/"
-    },
-    title: "Pick the solar farm"
-  },
-  // {
-  //   image1: "/placeholder.svg?height=400&width=300",
-  //   image2: "/placeholder.svg?height=400&width=300",
-  //   correctAnswer: "image2",
-  //   description1: "Rice Farm",
-  //   description2: "Lithium Mine",
-  //   location: "Salar de Uyuni, Bolivia",
-  //   charity: {
-  //     name: "Environmental Defense Fund",
-  //     url: "https://www.edf.org/"
-  //   },
-  //   title: "Pick the lithium mine"
-  // }
-]
+const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY, dangerouslyAllowBrowser: true});
 
 export default function GreenOrBad() {
-  const [currentPair, setCurrentPair] = useState<ImagePair | null>(null)
-  const [score, setScore] = useState(0)
-  const [totalQuestions, setTotalQuestions] = useState(0)
-  const [feedback, setFeedback] = useState<string | null>(null)
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
-  const [showCharity, setShowCharity] = useState(false)
-  const [revealAnswer, setRevealAnswer] = useState(false)
+  const [currentItem, setCurrentItem] = useState<ImageItem | null>(null);
+  const [seenItems, setSeenItems] = useState<Set<string>>(new Set());
+  const [score, setScore] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const [showCharity, setShowCharity] = useState(false);
+  const [userAnswer, setUserAnswer] = useState("");
+  const [previousAnswers, setPreviousAnswers] = useState<string[]>([]);
+  const [isCorrect, setIsCorrect] = useState(false);
+
+  // Initial system message for the conversation
+  const initialConversation = [
+    {
+      role: "system",
+      content: `You are a decider robot, deciding if the user's answer is correct. If correct, respond with a funny, topical joke. If incorrect, give an interesting, original, and humorous hint. Always respond in JSON format with "correct", "message", and "hint".`,
+    },
+  ];
+  const [conversation, setConversation] = useState(initialConversation);
 
   useEffect(() => {
-    console.log('Current pair:', currentPair);
-    nextQuestion();
-  }, [])
+    preloadImages();
+    pickRandomUnseenItem();
+  }, []);
 
-  const nextQuestion = () => {
-    const randomPair = imagePairs[Math.floor(Math.random() * imagePairs.length)]
-    setCurrentPair(randomPair)
-    setFeedback(null)
-    setIsCorrect(null)
-    setShowCharity(false)
-    setRevealAnswer(false)
-  }
+  const preloadImages = () => {
+    imageItems.forEach(item => {
+      const img = new Image();
+      img.src = item.image;
+    });
+  };
 
-  const handleGuess = (guess: "image1" | "image2") => {
-    if (!currentPair) return
+  const pickRandomUnseenItem = () => {
+    const unseenItems = imageItems.filter(item => !seenItems.has(item.correctAnswer));
 
-    const isCorrectGuess = guess === currentPair.correctAnswer
-    const selectedDescription = guess === "image1" ? currentPair.description1 : currentPair.description2
+    if (unseenItems.length === 0) {
+      setSeenItems(new Set());
+      setCurrentItem(imageItems[Math.floor(Math.random() * imageItems.length)]);
+    } else {
+      const randomItem = unseenItems[Math.floor(Math.random() * unseenItems.length)];
+      setCurrentItem(randomItem);
+      setSeenItems(prevSeen => new Set(prevSeen).add(randomItem.correctAnswer));
+    }
 
-    setScore(prevScore => isCorrectGuess ? prevScore + 1 : prevScore)
-    setTotalQuestions(prevTotal => prevTotal + 1)
-    setIsCorrect(isCorrectGuess)
-    setFeedback(
-      isCorrectGuess
-        ? "Correct! You identified the images accurately."
-        : `Incorrect. You selected ${selectedDescription}, but that wasn't right.`
-    )
-    setRevealAnswer(true)
-    setShowCharity(true)
+    // Reset state for a new question
+    setFeedback(null);
+    setHint(null);
+    setShowCharity(false);
+    setUserAnswer("");
+    setPreviousAnswers([]);
+    setIsCorrect(false);
 
-    setTimeout(() => {
-      setShowCharity(false)
-      setTimeout(nextQuestion, 500) // Delay to allow charity popup to fade out
-    }, 5000)
-  }
+    // Reset the AI conversation to start fresh
+    setConversation(initialConversation);
+  };
 
-  if (!currentPair) return null
+  const decider = async (guess: string) => {
+    if (!currentItem) return;
+
+    if (previousAnswers.includes(guess.toLowerCase())) {
+      setFeedback("⚠️ You have already tried this answer.");
+      return;
+    }
+
+    // Add the user's guess to the conversation
+    const updatedConversation = [
+      ...conversation,
+      { role: "user", content: `Answer: ${guess}` },
+    ];
+
+    // Send the entire conversation history to Groq
+    const response = await groq.chat.completions.create({
+      messages: [
+        ...updatedConversation,
+        {
+          role: "user",
+          content: JSON.stringify({
+            correctAnswer: currentItem.correctAnswer,
+            topic: "Waste or Taste",
+          }),
+        },
+      ],
+      model: "llama3-8b-8192",
+      temperature: 0.7,
+      stream: false,
+      response_format: { type: "json_object" },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+
+    // Add the AI's response to the conversation
+    setConversation([
+      ...updatedConversation,
+      { role: "assistant", content: JSON.stringify(result) },
+    ]);
+
+    if (result.correct) {
+      setFeedback(`✅ ${result.message}`);
+      setHint(null);
+      setScore(prevScore => prevScore + 1);
+      setTotalQuestions(prevTotal => prevTotal + 1);
+      setShowCharity(true);
+      setUserAnswer(currentItem.correctAnswer);
+      setIsCorrect(true);
+    } else {
+      setFeedback(`❌ ${result.message}`);
+      setHint(result.hint || "💡 Here's a hint to help you out!");
+      setPreviousAnswers(prev => [...prev, guess.toLowerCase()]);
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUserAnswer(event.target.value);
+  };
+
+  if (!currentItem) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg mx-auto border-2 border-white/20 backdrop-blur-sm bg-black/50">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg mx-auto">
         <CardHeader>
-          <CardTitle className="text-3xl sm:text-4xl text-center font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
-            <span className="flex items-center justify-center gap-2">
-              <Sparkles className="h-8 w-8 text-yellow-400" />
-              Green or Bad
-              <Sparkles className="h-8 w-8 text-yellow-400" />
-            </span>
-          </CardTitle>
-          <CardDescription className="text-center text-lg font-bold text-white/90">
-            {currentPair.title}
-          </CardDescription>
+          <CardTitle className="text-2xl sm:text-3xl text-center">What is on the picture?</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              variant="outline"
-              className="p-0 h-auto w-full sm:w-1/2 aspect-[3/4] overflow-hidden relative rounded-xl border-2 border-white/20 hover:scale-[1.02] transition-all duration-300"
-              onClick={() => handleGuess("image1")}
-              disabled={revealAnswer}
-            >
-              <img
-                src={currentPair.image1}
-                alt="First image in the pair"
-                className="w-full h-full object-cover"
+          <div className="flex flex-col gap-4">
+            <img
+              src={currentItem.image}
+              alt={currentItem.description}
+              className="w-full h-auto object-cover rounded-md"
+            />
+            {hint && <p className="text-center text-sm text-gray-600 mt-2">Hint: {hint}</p>}
+            <div className="flex gap-4 mt-4">
+              <input
+                type="text"
+                value={userAnswer}
+                onChange={handleInputChange}
+                placeholder="Enter your answer"
+                className="flex-1 p-2 border rounded"
+                disabled={isCorrect}
               />
-              {revealAnswer && (
-                <div className="absolute inset-x-0 bottom-0 bg-black/80 text-white p-3 text-center font-bold">
-                  {currentPair.description1}
-                </div>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              className="p-0 h-auto w-full sm:w-1/2 aspect-[3/4] overflow-hidden relative rounded-xl border-2 border-white/20 hover:scale-[1.02] transition-all duration-300"
-              onClick={() => handleGuess("image2")}
-              disabled={revealAnswer}
-            >
-              <img
-                src={currentPair.image2}
-                alt="Second image in the pair"
-                className="w-full h-full object-cover"
-              />
-              {revealAnswer && (
-                <div className="absolute inset-x-0 bottom-0 bg-black/80 text-white p-3 text-center font-bold">
-                  {currentPair.description2}
-                </div>
-              )}
-            </Button>
-          </div>
-          {revealAnswer && (
-            <p className="text-center mt-4 text-xl font-bold text-white">{currentPair.location}</p>
-          )}
-          {feedback && (
-            <div
-              className={`mt-4 p-4 rounded-xl border-2 flex items-center gap-2 animate-bounce-once ${
-                isCorrect 
-                  ? "bg-green-400/20 border-green-400 text-green-400" 
-                  : "bg-red-400/20 border-red-400 text-red-400"
-              }`}
-              role="alert"
-            >
-              {isCorrect ? <CheckCircle2 className="h-6 w-6" /> : <AlertCircle className="h-6 w-6" />}
-              <span className="font-bold">{feedback}</span>
+              <Button onClick={() => decider(userAnswer)} disabled={isCorrect}>
+                Submit
+              </Button>
             </div>
-          )}
-          {showCharity && (
-            <div className="mt-4 p-4 bg-blue-400/20 border-2 border-blue-400 text-blue-400 rounded-xl animate-fade-in-up">
-              <p className="font-bold mb-2">Level up your environmental knowledge! 🌍</p>
-              <a
-                href={currentPair.charity.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+            {previousAnswers.length > 0 && (
+              <div className="text-center text-sm text-gray-500 mt-2">
+                Previous answers: {previousAnswers.join(" → ")}
+              </div>
+            )}
+            {feedback && (
+              <div
+                className={`mt-4 p-4 rounded-md flex items-center gap-2 ${
+                  feedback.includes("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}
+                role="alert"
               >
-                Visit {currentPair.charity.name} <ExternalLink className="h-4 w-4" />
-              </a>
-            </div>
-          )}
+                {feedback.includes("Correct") ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+                {feedback}
+              </div>
+            )}
+            {showCharity && (
+              <div className="mt-4 p-4 bg-blue-100 text-blue-800 rounded-md animate-fade-in-up">
+                <p className="font-semibold mb-2">Learn more about environmental challenges:</p>
+                <a
+                  href={currentItem.charity.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:underline"
+                >
+                  Visit {currentItem.charity.name} <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+            )}
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col items-center">
           <div className="w-full max-w-xs mb-2">
-            <Progress 
-              value={(score / totalQuestions) * 100} 
-              className="h-3 rounded-full bg-white/10" 
-            />
+            <Progress value={(score / totalQuestions) * 100} className="h-2" />
           </div>
-          <p className="text-lg font-bold text-white/90">
+          <p className="text-sm text-muted-foreground">
             Score: {score} / {totalQuestions}
           </p>
+          {isCorrect && (
+            <Button className="mt-4" onClick={pickRandomUnseenItem}>
+              Next Question
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
