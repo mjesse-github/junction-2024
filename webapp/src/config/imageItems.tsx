@@ -1,4 +1,3 @@
-
 export type ImageItem = {
     imageName: string;
     correctAnswer: string;
@@ -7,6 +6,7 @@ export type ImageItem = {
     charity: {
       name: string;
       url: string;
+      fact: string;
     };
   };
 
@@ -18,7 +18,8 @@ export type ImageItem = {
       category: "Waste Management",
       charity: {
         name: "Clean Up The World, one day a year",
-        url: "https://www.worldcleanupday.org"
+        url: "https://www.worldcleanupday.org",
+        fact: "In 2023, 15 million people across 190 countries participated in World Cleanup Day, making it one of the largest civic movements of our time."
       },
     },
     {
@@ -28,7 +29,8 @@ export type ImageItem = {
       category: "Waste Management",
       charity: {
         name: "Clean Up The World, one day a year",
-        url: "https://www.worldcleanupday.org"
+        url: "https://www.worldcleanupday.org",
+        fact: "The movement started in Estonia in 2008 when 50,000 people united to clean up their entire country in just five hours."
       },
     },
     {
@@ -38,7 +40,8 @@ export type ImageItem = {
       category: "Farming",
       charity: {
         name: "Help fight world hunger",
-        url: "https://convoyofhope.org/articles/world-hunger-charities/"
+        url: "https://convoyofhope.org/articles/world-hunger-charities/",
+        fact: "Convoy of Hope has served more than 200 million people and distributed over $2 billion worth of food and supplies since 1994."
       },
     },
     {
@@ -48,7 +51,8 @@ export type ImageItem = {
       category: "Renewable Energy",
       charity: {
         name: "Solar Aid",
-        url: "https://solar-aid.org/"
+        url: "https://solar-aid.org/",
+        fact: "Solar Aid has helped over 11 million people access clean, safe solar light in Africa, saving families over $500 million in reduced energy costs."
       },
     },
     {
@@ -58,7 +62,8 @@ export type ImageItem = {
       category: "Renewable Energy",
       charity: {
         name: "WindEurope",
-        url: "https://windeurope.org"
+        url: "https://windeurope.org",
+        fact: "Wind energy now meets 17% of Europe's electricity demand and is expected to be Europe's largest source of electricity by 2027."
       },
     },
 ];

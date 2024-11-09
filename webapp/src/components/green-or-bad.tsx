@@ -238,26 +238,34 @@ export default function GreenOrBad() {
   if (!currentItem) return null;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <h1 className="text-left text-6xl font-bold mb-8 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent animate-fade-in relative">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-2 sm:p-4 sm:mt-0">
+      <h1 className="text-left text-3xl sm:text-6xl font-bold mb-4 sm:mb-8 bg-gradient-to-r from-red-400 to-green-500 bg-clip-text text-transparent animate-fade-in relative">
         Waste or Taste
-        <span className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-full transform scale-x-0 animate-scale-in"></span>
+        <span className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-green-500 rounded-full transform scale-x-0 animate-scale-in"></span>
       </h1>
       
       <Card className="w-full max-w-lg mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl sm:text-3xl text-center">What is on the picture?</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-xl sm:text-3xl text-center">What is on the picture?</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            <img
-              src={getImagePath(currentItem.imageName)}
-              alt={currentItem.description}
-              className="w-full h-auto object-cover rounded-md cursor-pointer transition-transform hover:scale-[1.02]"
-              onClick={handleImageClick}
-            />
-            {hint && <p className="text-center text-sm text-gray-600 mt-2">Hint: {hint}</p>}
-            <div className="flex gap-4 mt-4">
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="relative aspect-[4/3] w-full">
+              <img
+                src={getImagePath(currentItem.imageName)}
+                alt={currentItem.description}
+                className="absolute inset-0 w-full h-full object-cover rounded-md cursor-pointer transition-transform hover:scale-[1.02]"
+                onClick={handleImageClick}
+              />
+            </div>
+
+            {hint && (
+              <p className="text-center text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">
+                Hint: {hint}
+              </p>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 sm:mt-4">
               <input
                 ref={inputRef}
                 type="text"
@@ -265,14 +273,14 @@ export default function GreenOrBad() {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter your answer"
-                className="flex-1 p-2 border rounded"
+                className="flex-1 p-2 border rounded text-sm sm:text-base"
                 disabled={isCorrect || isSubmitting}
                 aria-label="Your answer"
               />
               <Button 
                 onClick={handleSubmit} 
                 disabled={isCorrect || !userAnswer.trim() || isSubmitting}
-                className="min-w-[100px] transition-all duration-200"
+                className="w-full sm:w-auto min-w-[100px] transition-all duration-200"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -284,24 +292,28 @@ export default function GreenOrBad() {
                 )}
               </Button>
             </div>
+
             {previousAnswers.length > 0 && (
-              <div className="text-center text-sm text-gray-500 mt-2">
+              <div className="text-center text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
                 Previous answers: {previousAnswers.join(" → ")}
               </div>
             )}
+
             {feedback && (
               <div
-                className={`mt-4 p-4 rounded-md flex items-center gap-2 ${
+                className={`mt-2 sm:mt-4 p-3 sm:p-4 rounded-md flex items-center gap-2 text-sm sm:text-base ${
                   feedback.includes("Correct") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                 }`}
                 role="alert"
               >
-                {/* {feedback.includes("Correct") ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />} */}
                 {feedback}
               </div>
             )}
+
             {showCharity && (
-              <div className="mt-4 p-4 bg-blue-100 text-blue-800 rounded-md animate-fade-in-up">
+              <div className="mt-2 sm:mt-4 p-3 sm:p-4 bg-blue-100 text-blue-800 rounded-md animate-fade-in-up text-sm sm:text-base">
+                <p className="font-semibold mb-2">Did you know?</p>
+                <p className="mb-3">{currentItem.charity.fact}</p>
                 <p className="font-semibold mb-2">Learn more about environmental challenges:</p>
                 <a
                   href={currentItem.charity.url}
@@ -315,43 +327,43 @@ export default function GreenOrBad() {
             )}
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col items-center">
+
+        <CardFooter className="flex flex-col items-center p-3 sm:p-6">
           <div className="w-full max-w-xs mb-2">
             <Progress value={(score / totalQuestions) * 100} className="h-2" />
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Score: {score} / {totalQuestions}
           </p>
           {isCorrect && (
-            <Button className="mt-4" onClick={pickRandomUnseenItem}>
+            <Button className="mt-3 sm:mt-4 w-full sm:w-auto" onClick={pickRandomUnseenItem}>
               Next Question
             </Button>
           )}
         </CardFooter>
       </Card>
 
-      {/* Image Modal */}
       <AnimatePresence>
         {isImageEnlarged && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer p-2 sm:p-4"
             onClick={handleCloseModal}
           >
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative w-full max-w-4xl p-4"
+              className="relative w-full max-w-4xl"
             >
               <img
                 src={getImagePath(currentItem.imageName)}
                 alt={currentItem.description}
                 className="w-full h-auto object-contain rounded-lg"
               />
-              <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+              <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-xs sm:text-sm bg-black/50 px-4 py-2 rounded-full whitespace-nowrap">
                 Click anywhere or press any key to close
               </p>
             </motion.div>
