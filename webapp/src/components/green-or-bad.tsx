@@ -69,31 +69,50 @@ export const backend = {
       throw new Error('Failed to save your answer. Please try again.');
     }
   },
-  async getRecentAnswers(query: {
-    user_id: string;
-    image_id: string;
-    is_correct: boolean | null;
-    limit: number;
-  }) {
+  async getRecentAnswers(imageId: string) {
     try {
       const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(query),
+        body: JSON.stringify({user_id: "",
+          image_id: imageId,
+          is_correct: false,
+          limit: 10}),
       });
 
       if (!previousAnswers.ok) {
         const errorData = await previousAnswers.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
       }
-
+      console.log(previousAnswers);
       return previousAnswers.json();
     } catch (error) {
       console.error('Find previous replies failed failed:', error);
     }
   }
+
+  // const getRecentAnswers = async (imageId: string) => {
+  //   try {
+  //     const response = await fetch(
+  //       `${backend.baseUrl}/api/groq/guesses?` + 
+  //       new URLSearchParams({
+  //         image_id: imageId,
+  //         limit: '10'
+  //       })
+  //     );
+      
+  //     if (!response.ok) throw new Error('Failed to fetch recent answers');
+      
+  //     const data = await response.json();
+  //     console.log('Recent answers for image:', imageId, data);
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Error fetching recent answers:', error);
+  //     return [];
+  //   }
+  // };
 };
 
 export default function GreenOrBad() {
@@ -267,7 +286,7 @@ export default function GreenOrBad() {
         const response = await backend.chat(updatedConversation);
         const result = JSON.parse(response.content);
 
-        // Store the answer asynchronously but don't wait for it
+        //FireandForget Store the answer asynchronously but don't wait for it
         backend.submitResponse({
           user_id: null,
           image_id: currentItem.imageName,
@@ -286,12 +305,14 @@ export default function GreenOrBad() {
         if (result.correct) {
           setFeedback(`✅ ${result.message}`);
           setHint(null);
-          setScore(prev => prev + 1);
-          setTotalQuestions(prev => prev + 1);
+          setScore(prevScore => prevScore + 1);
+          setTotalQuestions(prevTotal => prevTotal + 1);
           setShowCharity(true);
           setUserAnswer(currentItem.correctAnswer);
           setIsCorrect(true);
-          //TODO fetch previous guessess and visualise
+          
+          // Fetch and log recent answers when correct
+          await backend.getRecentAnswers(currentItem.imageName);
         } else {
           setFeedback(`❌ ${result.message}`);
           setHint(result.hint || "💡 Here's a hint to help you out!");
