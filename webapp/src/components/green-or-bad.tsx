@@ -22,8 +22,8 @@ type ImagePair = {
 
 const imagePairs: ImagePair[] = [
   {
-    image1: "/landfill.png?height=400&width=300",
-    image2: "/burning-man.png?height=400&width=300",
+    image1: "/landfill.png",
+    image2: "/burning-man.png",
     correctAnswer: "image1",
     description1: "Landfill",
     description2: "Burning man",
@@ -129,7 +129,7 @@ export default function GreenOrBad() {
               <img
                 src={currentPair.image1}
                 alt="First image in the pair"
-                className={`w-full h-full object-cover transition-all duration-300 ${revealAnswer ? "" : "grayscale"}`}
+                className={`w-full h-full object-cover transition-all duration-300`}
               />
               {revealAnswer && (
                 <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-70 text-white p-2 text-center">
@@ -146,7 +146,7 @@ export default function GreenOrBad() {
               <img
                 src={currentPair.image2}
                 alt="Second image in the pair"
-                className={`w-full h-full object-cover transition-all duration-300 ${revealAnswer ? "" : "grayscale"}`}
+                className={`w-full h-full object-cover transition-all duration-300`}
               />
               {revealAnswer && (
                 <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-70 text-white p-2 text-center">
