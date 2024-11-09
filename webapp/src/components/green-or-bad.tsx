@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
+import { FlippableCard } from './FlippableCard';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
@@ -67,51 +68,7 @@ export const backend = {
       console.error('Store answer failed:', error);
       throw new Error('Failed to save your answer. Please try again.');
     }
-  },
-  async getRecentAnswers(imageId: string) {
-    try {
-      const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({user_id: "",
-          image_id: imageId,
-          is_correct: false,
-          limit: 10}),
-      });
-
-      if (!previousAnswers.ok) {
-        const errorData = await previousAnswers.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
-      }
-      console.log(previousAnswers);
-      return previousAnswers.json();
-    } catch (error) {
-      console.error('Find previous replies failed failed:', error);
-    }
   }
-
-  // const getRecentAnswers = async (imageId: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `${backend.baseUrl}/api/groq/guesses?` +
-  //       new URLSearchParams({
-  //         image_id: imageId,
-  //         limit: '10'
-  //       })
-  //     );
-
-  //     if (!response.ok) throw new Error('Failed to fetch recent answers');
-
-  //     const data = await response.json();
-  //     console.log('Recent answers for image:', imageId, data);
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Error fetching recent answers:', error);
-  //     return [];
-  //   }
-  // };
 };
 
 export default function GreenOrBad() {
@@ -130,6 +87,8 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [recentGuesses, setRecentGuesses] = useState<any[]>([]);
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
@@ -236,6 +195,33 @@ export default function GreenOrBad() {
     });
   };
 
+  const getRecentAnswers = async (imageId: string) => {
+    try {
+      const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({user_id: "",
+          image_id: imageId,
+          is_correct: false,
+          limit: 10}),
+      });
+
+      if (!previousAnswers.ok) {
+        const errorData = await previousAnswers.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
+      }
+      const data = await previousAnswers.json();
+      const guesses = data.map((item: any) => item.guess);
+      // alert("previous guesses of players"  + guesses);
+      setRecentGuesses(guesses);
+      return guesses;
+    } catch (error) {
+      console.error('Find previous replies failed failed:', error);
+    }
+  }
+
   const pickRandomUnseenItem = () => {
     const unseenItems = imageItems.filter(item => !seenItems.has(item.correctAnswer));
 
@@ -321,7 +307,7 @@ export default function GreenOrBad() {
           setIsCorrect(true);
 
           // Fetch and log recent answers when correct
-          await backend.getRecentAnswers(currentItem.imageName);
+          await getRecentAnswers(currentItem.imageName);
         } else {
           setFeedback(`❌ ${result.message}`);
           setHint(result.hint || "💡 Here's a hint to help you out!");
