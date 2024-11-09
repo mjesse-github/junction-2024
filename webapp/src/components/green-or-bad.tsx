@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
+import { FlippableCard } from './FlippableCard';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
@@ -67,51 +68,7 @@ export const backend = {
       console.error('Store answer failed:', error);
       throw new Error('Failed to save your answer. Please try again.');
     }
-  },
-  async getRecentAnswers(imageId: string) {
-    try {
-      const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({user_id: "",
-          image_id: imageId,
-          is_correct: false,
-          limit: 10}),
-      });
-
-      if (!previousAnswers.ok) {
-        const errorData = await previousAnswers.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
-      }
-      console.log(previousAnswers);
-      return previousAnswers.json();
-    } catch (error) {
-      console.error('Find previous replies failed failed:', error);
-    }
   }
-
-  // const getRecentAnswers = async (imageId: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `${backend.baseUrl}/api/groq/guesses?` +
-  //       new URLSearchParams({
-  //         image_id: imageId,
-  //         limit: '10'
-  //       })
-  //     );
-
-  //     if (!response.ok) throw new Error('Failed to fetch recent answers');
-
-  //     const data = await response.json();
-  //     console.log('Recent answers for image:', imageId, data);
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Error fetching recent answers:', error);
-  //     return [];
-  //   }
-  // };
 };
 
 export default function GreenOrBad() {
@@ -130,7 +87,12 @@ export default function GreenOrBad() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
+<<<<<<< HEAD
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+=======
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [recentGuesses, setRecentGuesses] = useState<any[]>([]);
+>>>>>>> 248245019f92c46d3eba28d9437cc3fd3667da27
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
@@ -148,8 +110,8 @@ export default function GreenOrBad() {
         
         Rules of Engagement
         Keep the Topic Locked In: Once they start guessing, keep the answer under wraps. No new topic hints.
-        Close Enough? Give Them a Pass: If they’re nearly right but missed a detail like singular/plural, let it slide with a friendly nudge.
-        Exact Answer Required: Encourage them to try for the exact answer instead of asking for confirmation.
+        Close Enough? Give Them a Pass: If they’re nearly right but missed a tiny detail but semantically are correct, it's ok
+    
         Vibe Guide
         Step One — Are They on the Money or in the Ballpark?
         
@@ -189,7 +151,7 @@ export default function GreenOrBad() {
             Step One — Check if They’re Giving Rizz or getting Ls:
             Just a quick vibe check on the answer — no hype, no fanfare we’re just seeing if they are sigma or if they’re out here NPC-ing hard. You do not care; you’re barely even looking, honestly. If it's close enuff let it slip.
             The user cannot just say correct, they need to say the real answer. 
-            If the true answer is in plural and the guess is not, but otherwise it's fine, then let it go and vice verca.
+            If the true answer is in plural and the guess is not, but otherwise it's fine, then let it go and vice verca - small typos are fine as well
       
             If They Got It Right (W) (aka Big Dick Energy):
             The reply needs to feel like main character energy, like they are GOATed Hit them with a joke that feels iconic and harsh if they got answers wrong before.
@@ -236,6 +198,33 @@ export default function GreenOrBad() {
       img.src = getImagePath(item.imageName);
     });
   };
+
+  const getRecentAnswers = async (imageId: string) => {
+    try {
+      const previousAnswers = await fetch(`${API_URL}/api/groq/getRecentAnswers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({user_id: "",
+          image_id: imageId,
+          is_correct: false,
+          limit: 10}),
+      });
+
+      if (!previousAnswers.ok) {
+        const errorData = await previousAnswers.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${previousAnswers.status}`);
+      }
+      const data = await previousAnswers.json();
+      const guesses = data.map((item: any) => item.guess);
+      // alert("previous guesses of players"  + guesses);
+      setRecentGuesses(guesses);
+      return guesses;
+    } catch (error) {
+      console.error('Find previous replies failed failed:', error);
+    }
+  }
 
   const pickRandomUnseenItem = () => {
     const unseenItems = imageItems.filter(item => !seenItems.has(item.correctAnswer));
@@ -322,7 +311,7 @@ export default function GreenOrBad() {
           setIsCorrect(true);
 
           // Fetch and log recent answers when correct
-          await backend.getRecentAnswers(currentItem.imageName);
+          await getRecentAnswers(currentItem.imageName);
         } else {
           setFeedback(`❌ ${result.message}`);
           setHint(result.hint || "💡 Here's a hint to help you out!");
