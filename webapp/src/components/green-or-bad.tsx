@@ -190,12 +190,11 @@ export default function GreenOrBad() {
 
       const updatedConversation = [
         ...conversation,
-        { role: "user", content: `User guessed: "${guess}"` },
+        { role: "user", content: `The User guessed: "${guess}"` },
         {
           role: "user",
           content: JSON.stringify({
-            correctAnswer: currentItem.correctAnswer,
-            topic: "Waste or Taste",
+            currentItem: currentItem,
           }),
         },
       ];
