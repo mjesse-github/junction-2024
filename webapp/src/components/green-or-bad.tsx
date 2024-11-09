@@ -157,7 +157,7 @@ export default function GreenOrBad() {
     ],
   };
 
-  const [conversation, setConversation] = useState(difficulty ? initialConversations[difficulty] : []);
+  const [conversation, setConversation] = useState(null);
 
   const handleDifficultySelect = (mode: string) => {
     setDifficulty(mode);
