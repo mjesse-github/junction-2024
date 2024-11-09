@@ -2,6 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI is required');
 }
@@ -12,16 +13,13 @@ const client = new MongoClient(process.env.MONGODB_URI, {
     strict: true,
     deprecationErrors: true,
   },
-  ssl: true,
-  tls: true,
-  tlsAllowInvalidCertificates: false,
-  tlsAllowInvalidHostnames: false,
+  // SSL/TLS options
+  tls: true,                   // Use TLS for connection
+  ssl: true,                   // Required for some MongoDB Atlas clusters
   retryWrites: true,
   w: 'majority',
-  minPoolSize: 1,
   maxPoolSize: 10,
-  connectTimeoutMS: 30000,
-  socketTimeoutMS: 30000,
+  minPoolSize: 1,
 });
 
 let dbConnection: any = null;
@@ -48,14 +46,14 @@ export const connectDB = async () => {
   }
 };
 
-// Add connection cleanup
+// Cleanup on application shutdown
 process.on('SIGINT', async () => {
   try {
     await client.close();
-    console.log('MongoDB connection closed through app termination');
+    console.log('MongoDB connection closed');
     process.exit(0);
   } catch (err) {
-    console.error('Error during MongoDB connection closure:', err);
+    console.error('Error closing MongoDB connection:', err);
     process.exit(1);
   }
 }); 
