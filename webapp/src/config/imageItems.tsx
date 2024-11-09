@@ -22,6 +22,16 @@ export type ImageItem = {
       },
     },
     {
+      imageName: "landfill-3.png",
+      correctAnswer: "Landfill",
+      description: "A landfill site in Estonia",
+      category: "Waste Management",
+      charity: {
+        name: "Clean Up The World, one day a year",
+        url: "https://www.worldcleanupday.org"
+      },
+    },
+    {
       imageName: "circular-farm.jpg",
       correctAnswer: "Circular Farm",
       description: "Circular Farm in Kansas",
@@ -41,5 +51,14 @@ export type ImageItem = {
         url: "https://solar-aid.org/"
       },
     },
-    // Add more items as needed
-  ];
+    {
+      imageName: "wind-mills.png",
+      correctAnswer: "Wind mills",
+      description: "A windmills in the forest a satellite image",
+      category: "Renewable Energy",
+      charity: {
+        name: "WindEurope",
+        url: "https://windeurope.org"
+      },
+    },
+];
