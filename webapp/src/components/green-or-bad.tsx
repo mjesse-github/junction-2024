@@ -8,7 +8,6 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
-import { FlippableCard } from './FlippableCard';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
