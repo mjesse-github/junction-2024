@@ -1,6 +1,6 @@
 
 export type ImageItem = {
-    image: string;
+    imageName: string;
     correctAnswer: string;
     description: string;
     category: string;
@@ -9,10 +9,10 @@ export type ImageItem = {
       url: string;
     };
   };
-  
+
   export const imageItems: ImageItem[] = [
     {
-      image: "/landfill.png",
+      imageName: "landfill.png",
       correctAnswer: "Landfill",
       description: "A landfill site in the Nevada Desert",
       category: "Waste Management",
@@ -22,7 +22,7 @@ export type ImageItem = {
       },
     },
     {
-      image: "/solar-farm-1.png",
+      imageName: "solar-farm-1.png",
       correctAnswer: "Solar Farm",
       description: "A solar farm, whichs picture looks like it could skyscrapers",
       category: "Renewable Energy",

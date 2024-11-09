@@ -40,7 +40,7 @@ export default function GreenOrBad() {
   const preloadImages = () => {
     imageItems.forEach(item => {
       const img = new Image();
-      img.src = item.image;
+      img.src = getImagePath(item.imageNmae);
     });
   };
 
