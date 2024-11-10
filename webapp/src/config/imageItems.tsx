@@ -14,12 +14,12 @@ export type ImageItem = {
     {
       imageName: "landfill.png",
       correctAnswer: "Landfill",
-      description: "A landfill site in the Nevada Desert",
+      description: "A monstrous landfill in New Dehli",
       category: "Waste Management",
       charity: {
         name: "Clean Up The World, one day a year",
         url: "https://www.worldcleanupday.org",
-        fact: "In 2023, 15 million people across 190 countries participated in World Cleanup Day, making it one of the largest civic movements of our time."
+        fact: "Recycling keeps landfills smaller."
       },
     },
     {
@@ -42,6 +42,28 @@ export type ImageItem = {
         name: "Help fight world hunger",
         url: "https://convoyofhope.org/articles/world-hunger-charities/",
         fact: "Convoy of Hope has served more than 200 million people and distributed over $2 billion worth of food and supplies since 1994."
+      },
+    },
+    {
+      imageName: "coal-plant.png",
+      correctAnswer: "Coal plant",
+      description: "Coal plant in Pakistan",
+      category: "Pollutant",
+      charity: {
+        name: "Clean Air Fund",
+        url: "https://www.cleanairfund.org",
+        fact: "Clean Air Fund created a unique 'Visualising Air Pollution' project, raising awareness through authentic visuals."
+      },
+    },
+    {
+      imageName: "rainbow.png",
+      correctAnswer: "Rainbow",
+      description: "Just a rainbow in UK",
+      category: "Beauty",
+      charity: {
+        name: "Rainbow preservation fund",
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        fact: "Did you know that climate change decreased occurances of rainbows by 70%? Check out the rainbow preservation fund"
       },
     },
     {
