@@ -89,7 +89,7 @@ export default function GreenOrBad() {
   const [showLanding, setShowLanding] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [recentGuesses, setRecentGuesses] = useState<any[]>([]);
-  const [isGuessesModalOpen, setIsGuessesModalOpen] = useState(false);
+  const [isGuessesModalOpen, setIsGuessesModalOpen] = useState(false);``
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
@@ -764,7 +764,30 @@ export default function GreenOrBad() {
         <ModalContent>
           <ModalBody>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <button
+                onClick={() => setIsGuessesModalOpen(false)}
+                className="absolute top-2 right-2 p-2 text-white/60 hover:text-white/90 transition-colors rounded-lg
+                         hover:bg-white/10"
+                aria-label="Close modal"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
+              <div className="flex items-center justify-between pr-8">
                 <h3 className="text-xl font-light text-white">Previous Guesses</h3>
                 <p className="text-sm text-white/60">Other players tried...</p>
               </div>
@@ -788,7 +811,7 @@ export default function GreenOrBad() {
               )}
 
               <p className="text-center text-white/40 text-sm">
-                Click outside to close
+                Click outside or the X button to close
               </p>
             </div>
           </ModalBody>
