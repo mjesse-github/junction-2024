@@ -547,13 +547,13 @@ export default function GreenOrBad() {
   if (!currentItem) return null;
 
   return (
-    <div className="h-screen bg-black flex items-center justify-center p-3 relative overflow-y-auto md:overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center p-3 overflow-y-auto">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))] fixed" />
       
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative z-10 w-full max-w-6xl h-[85vh] flex flex-col"
+        className="relative z-10 w-full max-w-6xl py-8 flex flex-col"
       >
         {/* Header - Reduced margin */}
         <motion.h2 
