@@ -604,8 +604,9 @@ export default function GreenOrBad() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center text-emerald-300/60 text-sm font-light"
+                className="text-center text-emerald-300/60 text-sm font-light flex items-center justify-center gap-2"
               >
+                <span className="text-emerald-300/80">💡</span>
                 {hint}
               </motion.div>
             )}
