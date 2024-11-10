@@ -17,9 +17,9 @@ export type ImageItem = {
       description: "A landfill site in the Nevada Desert",
       category: "Waste Management",
       charity: {
-        name: "Clean Up The World, one day a year",
+        name: "World Cleanup Day",
         url: "https://www.worldcleanupday.org",
-        fact: "In 2023, 15 million people across 190 countries participated in World Cleanup Day, making it one of the largest civic movements of our time."
+        fact: "World Cleanup Day 2023 united 15 million people across 190 countries in the world's largest single peacetime civic action, removing millions of tons of waste from our environment."
       },
     },
     {
@@ -28,9 +28,9 @@ export type ImageItem = {
       description: "A landfill site in Estonia",
       category: "Waste Management",
       charity: {
-        name: "Clean Up The World, one day a year",
+        name: "World Cleanup Day",
         url: "https://www.worldcleanupday.org",
-        fact: "The movement started in Estonia in 2008 when 50,000 people united to clean up their entire country in just five hours."
+        fact: "World Cleanup Day originated in Estonia in 2008 as 'Let's Do It!', when 50,000 people (4% of the population) united to clean up 10,000 tons of illegal waste across their entire country in just five hours."
       },
     },
     {
@@ -39,31 +39,31 @@ export type ImageItem = {
       description: "Circular Farm in Kansas",
       category: "Farming",
       charity: {
-        name: "Help fight world hunger",
+        name: "Convoy of Hope",
         url: "https://convoyofhope.org/articles/world-hunger-charities/",
-        fact: "Convoy of Hope has served more than 200 million people and distributed over $2 billion worth of food and supplies since 1994."
+        fact: "Convoy of Hope's Agriculture program has trained over 250,000 farmers in sustainable farming practices across 40 nations, while distributing $2 billion worth of food and supplies since 1994."
       },
     },
     {
       imageName: "solar-farm-1.png",
       correctAnswer: "Solar Farm",
-      description: "A solar farm, whichs picture looks like it could skyscrapers",
+      description: "A solar farm, which from satellite imagery resembles an urban skyline",
       category: "Renewable Energy",
       charity: {
         name: "Solar Aid",
         url: "https://solar-aid.org/",
-        fact: "Solar Aid has helped over 11 million people access clean, safe solar light in Africa, saving families over $500 million in reduced energy costs."
+        fact: "Solar Aid has distributed over 2.3 million solar lights across Africa since 2006, reducing CO2 emissions by 5.4 million tonnes and saving families an average of $1,000 each in reduced kerosene costs."
       },
     },
     {
       imageName: "wind-mills.png",
       correctAnswer: "Wind mills",
-      description: "A windmills in the forest a satellite image",
+      description: "Wind turbines in a forested area viewed from satellite",
       category: "Renewable Energy",
       charity: {
         name: "WindEurope",
         url: "https://windeurope.org",
-        fact: "Wind energy now meets 17% of Europe's electricity demand and is expected to be Europe's largest source of electricity by 2027."
+        fact: "As of 2023, wind energy provides 17% of Europe's electricity from 236 GW of capacity. By 2027, it's projected to become Europe's primary electricity source, surpassing both nuclear and natural gas."
       },
     },
 ];
