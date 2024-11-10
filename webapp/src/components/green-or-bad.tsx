@@ -213,7 +213,7 @@ export default function GreenOrBad() {
       }
       const data = await previousAnswers.json();
       const guesses = data.map((item: any) => item.guess);
-      alert("previous guesses of players"  + guesses);
+      alert("previous guesses of players:   "  + guesses);
       setRecentGuesses(guesses);
       return guesses;
     } catch (error) {
