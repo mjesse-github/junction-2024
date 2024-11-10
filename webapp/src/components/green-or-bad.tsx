@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Send } from "lucide-r
 import { imageItems, ImageItem } from "@/config/imageItems";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImagePath } from '@/utils/paths'
+import { Modal, ModalContent, ModalBody } from "./ui/modal";
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://junction-2024-space-xsef-506da202a0f5.herokuapp.com';
@@ -88,6 +89,7 @@ export default function GreenOrBad() {
   const [showLanding, setShowLanding] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [recentGuesses, setRecentGuesses] = useState<any[]>([]);
+  const [isGuessesModalOpen, setIsGuessesModalOpen] = useState(false);
 
   const initialConversations: Record<'easy' | 'hard', ChatMessage[]> = {
     easy: [
@@ -213,7 +215,7 @@ export default function GreenOrBad() {
       }
       const data = await previousAnswers.json();
       const guesses = data.map((item: any) => item.guess);
-      alert("previous guesses of players:   "  + guesses);
+      setIsGuessesModalOpen(true);
       setRecentGuesses(guesses);
       return guesses;
     } catch (error) {
@@ -754,6 +756,44 @@ export default function GreenOrBad() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Modal 
+        isOpen={isGuessesModalOpen} 
+        onClose={() => setIsGuessesModalOpen(false)}
+      >
+        <ModalContent>
+          <ModalBody>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-light text-white">Previous Guesses</h3>
+                <p className="text-sm text-white/60">Other players tried...</p>
+              </div>
+              
+              <div className="space-y-2">
+                {recentGuesses.map((guess, index) => (
+                  <div 
+                    key={index}
+                    className="p-3 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between"
+                  >
+                    <span className="text-white/80">{guess}</span>
+                    <span className="text-sm text-white/40">#{index + 1}</span>
+                  </div>
+                ))}
+              </div>
+
+              {recentGuesses.length === 0 && (
+                <p className="text-center text-white/40 py-8">
+                  No previous guesses found
+                </p>
+              )}
+
+              <p className="text-center text-white/40 text-sm">
+                Click outside to close
+              </p>
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
