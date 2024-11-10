@@ -91,7 +91,7 @@ export async function findRecentGuesses(request: FindQuery) {
       query.image_id = request.image_id;
     }
     
-    if (request.is_correct) {
+    if (request.is_correct !== undefined) {
       query.is_correct = request.is_correct;
     }
 
