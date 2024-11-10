@@ -531,6 +531,17 @@ export default function GreenOrBad() {
             </motion.button>
           </div>
 
+          {/* Add tip below buttons */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-white/40 text-sm font-light flex items-center justify-center gap-2"
+          >
+            <span className="text-white/60">💡</span>
+            Try as many answers as you'd like, and read hints!
+          </motion.div>
+
           {/* Subtle decorative element */}
           <motion.div
             initial={{ opacity: 0 }}
